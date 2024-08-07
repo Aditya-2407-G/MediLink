@@ -1,17 +1,9 @@
-import { SplashScreen, Stack } from "expo-router";
+import { Redirect, SplashScreen, Stack } from "expo-router";
 import { useFonts } from "expo-font";
 import { useEffect } from "react";
-import AuthProvider from "../context/AuthContext.js"
-
+import AuthProvider from "../context/AuthContext.js";
 
 export default function RootLayout() {
-
-    // const  {authState}:any = useAuth();
-
-    // if(authState?.authenticated) {
-    //     return<Redirect href="/Home" />
-    // }
-
     const [fontLoaded, error] = useFonts({
         "Poppins-Black": require("../assets/fonts/Poppins-Black.ttf"),
         "Poppins-Bold": require("../assets/fonts/Poppins-Bold.ttf"),

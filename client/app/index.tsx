@@ -5,24 +5,18 @@ import CustomButton from "../components/CustomButton";
 import { Redirect, router } from "expo-router";
 import { useAuth } from "@/context/AuthContext";
 
-
 export default function Index() {
+    const { authState } = useAuth();
 
-    const {authState} = useAuth();
-
-    if(authState?.authenticated) {
-        return <Redirect href="/Home" />
+    if (authState?.authenticated) {
+        return <Redirect href="/Home" />;
     }
-
-
-
 
     return (
         <SafeAreaView className="flex bg-primary">
             <ScrollView contentContainerStyle={{ height: "100%" }}>
                 {/* @ts-ignore */}
-                <StatusBar backgroundColor="#161622" style ="light" />
-
+                <StatusBar backgroundColor="#161622" style="light" />
 
                 <View>
                     <Text className="text-white font-extrabold text-center text-3xl p-10">

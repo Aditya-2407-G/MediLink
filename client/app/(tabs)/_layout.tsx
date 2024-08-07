@@ -1,11 +1,9 @@
 import { StatusBar } from "expo-status-bar";
 import { Redirect, Tabs } from "expo-router";
-import { View } from "react-native";
-import { Text } from "react-native";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { icons } from "../../constants";
+import { TabIcon } from "../../components/TabIcon";
 
 const TabLayout = () => {
-
     return (
         <>
             <StatusBar backgroundColor="#161622" style="light" />
@@ -15,14 +13,12 @@ const TabLayout = () => {
                     tabBarInactiveTintColor: "#CDCDE0",
                     tabBarShowLabel: false,
                     tabBarStyle: {
-                        backgroundColor: "#1E1E2C",
-                        borderTopWidth: -1,
                         height: 70,
                         borderRadius: 100,
                         position: "absolute",
-                        bottom: 20, // Adjust this value to move the tab bar up
-                        left: 10, // Add padding from left
-                        right: 10, // Add padding from right
+                        bottom: 20,
+                        left: 20,
+                        right: 20,
                     },
                 }}
             >
@@ -31,9 +27,18 @@ const TabLayout = () => {
                     options={{
                         title: "Home",
                         headerShown: false,
+                        tabBarIcon: ({ color, focused }) => (
+                            <TabIcon
+                                icon={icons.home}
+                                color={color}
+                                name="Home"
+                                focused={focused}
+                                containerStyle="w-6 h-6"
+                                iconStyle="gap-2"
+                            />
+                        ),
                     }}
                 />
-
             </Tabs>
         </>
     );

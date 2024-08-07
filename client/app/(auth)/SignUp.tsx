@@ -1,10 +1,17 @@
-import { View, Text, ScrollView, SafeAreaView, TextInput, Alert } from 'react-native'
-import React from 'react'
-import { Formik } from 'formik';
-import CustomButton from '@/components/CustomButton';
-import * as Yup from 'yup';
-import { Link } from 'expo-router';
-import { useAuth } from '@/context/AuthContext';
+import {
+    View,
+    Text,
+    ScrollView,
+    SafeAreaView,
+    TextInput,
+    Alert,
+} from "react-native";
+import React from "react";
+import { Formik } from "formik";
+import CustomButton from "@/components/CustomButton";
+import * as Yup from "yup";
+import { Link } from "expo-router";
+import { useAuth } from "@/context/AuthContext";
 
 const formSchema = Yup.object().shape({
     name: Yup.string().required("name is required"),
@@ -21,8 +28,7 @@ interface Values {
 }
 
 const SignUp = () => {
-
-    const {register}: any = useAuth();
+    const { register }: any = useAuth();
 
     const handleSignUp = async (values: Values) => {
         try {
@@ -30,14 +36,24 @@ const SignUp = () => {
         } catch (error) {
             console.log("Error signing up", error);
         }
-    }
+    };
 
     return (
         <SafeAreaView className="flex-1 bg-green-50">
-            <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }} className="px-5">
+            <ScrollView
+                contentContainerStyle={{
+                    flexGrow: 1,
+                    justifyContent: "center",
+                }}
+                className="px-5"
+            >
                 <View className="bg-white rounded-3xl p-6 px-5 shadow-lg">
-                    <Text className="text-green-800 text-4xl mb-2 text-center font-extrabold">Sign Up</Text>
-                    <Text className="text-green-600 text-xl mb-8 text-center">Your Access to Top Doctors</Text>
+                    <Text className="text-green-800 text-4xl mb-2 text-center font-extrabold">
+                        Sign Up
+                    </Text>
+                    <Text className="text-green-600 text-xl mb-8 text-center">
+                        Your Access to Top Doctors
+                    </Text>
                     <Formik
                         initialValues={{
                             email: "",
@@ -58,9 +74,9 @@ const SignUp = () => {
                             touched,
                         }) => (
                             <View className="space-y-5">
-                                <View className='flex flex-col'>
+                                <View className="flex flex-col">
                                     <Text className="text-green-700 font-semibold mb-2 text-lg">
-                                      Name
+                                        Name
                                     </Text>
                                     <TextInput
                                         className="border border-green-300 rounded-lg p-4 bg-green-50 text-lg"
@@ -76,9 +92,9 @@ const SignUp = () => {
                                     )}
                                 </View>
 
-                                <View className='flex flex-col'>
+                                <View className="flex flex-col">
                                     <Text className="text-green-700 font-semibold mb-2 text-lg">
-                                      Email
+                                        Email
                                     </Text>
                                     <TextInput
                                         className="border border-green-300 rounded-lg p-4 bg-green-50 text-lg"
@@ -94,9 +110,9 @@ const SignUp = () => {
                                     )}
                                 </View>
 
-                                <View className='flex flex-col'>
+                                <View className="flex flex-col">
                                     <Text className="text-green-700 font-semibold mb-2 text-lg">
-                                      Password
+                                        Password
                                     </Text>
                                     <TextInput
                                         className="border border-green-300 rounded-lg p-4 bg-green-50 text-lg"
@@ -138,6 +154,6 @@ const SignUp = () => {
             </ScrollView>
         </SafeAreaView>
     );
-}
+};
 
-export default SignUp
+export default SignUp;

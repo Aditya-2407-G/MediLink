@@ -1,4 +1,11 @@
-import { View, Text, ScrollView, SafeAreaView, TextInput, Alert } from "react-native";
+import {
+    View,
+    Text,
+    ScrollView,
+    SafeAreaView,
+    TextInput,
+    Alert,
+} from "react-native";
 import React from "react";
 import { Formik } from "formik";
 import CustomButton from "@/components/CustomButton";
@@ -19,9 +26,7 @@ interface Values {
 }
 
 const SignIn = () => {
-
-    const {login} = useAuth();
-
+    const { login } = useAuth();
 
     const handleSignIn = async (values: Values) => {
         try {
@@ -30,8 +35,8 @@ const SignIn = () => {
             router.replace("/Home");
         } catch (error) {
             console.log("Error signing in", error);
-        }        
-    }
+        }
+    };
 
     return (
         <SafeAreaView className="flex-1 bg-green-50">
@@ -47,8 +52,8 @@ const SignIn = () => {
                         Sign In
                     </Text>
                     <Text className="text-green-600 text-xl mb-8 text-center">
-                    {/* Find top medical experts, ready to see you */}
-                    Access best of healthcare
+                        {/* Find top medical experts, ready to see you */}
+                        Access best of healthcare
                     </Text>
                     <Formik
                         initialValues={{

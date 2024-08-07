@@ -6,20 +6,20 @@ import { Redirect, router } from "expo-router";
 import { useAuth } from "@/context/AuthContext";
 
 export default function Index() {
-    const { authState } = useAuth();
+    // const { authState } = useAuth();
 
-    if (authState?.authenticated) {
-        return <Redirect href="/Home" />;
-    }
+    // if (authState?.authenticated) {
+    //     return <Redirect href="/Home" />;
+    // }
 
     return (
-        <SafeAreaView className="flex bg-primary">
+        <SafeAreaView className="flex-1 ">
             <ScrollView contentContainerStyle={{ height: "100%" }}>
                 {/* @ts-ignore */}
                 <StatusBar backgroundColor="#161622" style="light" />
 
                 <View>
-                    <Text className="text-white font-extrabold text-center text-3xl p-10">
+                    <Text className="text-white font-poppins-regular text-center text-3xl p-10">
                         Welcome to MediLink !
                     </Text>
                 </View>
@@ -35,6 +35,13 @@ export default function Index() {
                     <CustomButton
                         title="Sign Up"
                         handlePress={() => router.push("/SignUp")}
+                        containerStyles="bg-green-600 w-1/3"
+                        textStyles="text-xl text-white"
+                        isLoading={undefined}
+                    />
+                    <CustomButton
+                        title="Home"
+                        handlePress={() => router.push("/Home")}
                         containerStyles="bg-green-600 w-1/3"
                         textStyles="text-xl text-white"
                         isLoading={undefined}

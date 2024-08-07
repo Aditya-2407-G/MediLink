@@ -5,7 +5,8 @@ import { Alert } from "react-native";
 
 const ACCESS_TOKEN_KEY = "accessToken";
 const REFRESH_TOKEN_KEY = "refreshToken";
-export const API_URL = "http://192.168.0.174:8000";
+// export const API_URL = "http://192.168.1.6:8000";
+export const API_URL = "http://192.168.29.57:8000";
 
 // Create the AuthContext
 const AuthContext = createContext();
@@ -17,6 +18,7 @@ export const useAuth = () => {
 
 // AuthProvider component
 const AuthProvider = ({ children }) => {
+
     const [authState, setAuthState] = useState({
         accessToken: null,
         refreshToken: null,
@@ -47,12 +49,11 @@ const AuthProvider = ({ children }) => {
         loadTokens();
     }, []);
 
-    const register = async (name, email, password) => {
+    const register = async (user) => {
         try {
+            console.log("USER BEING SENT IS: ",user)
             const response = await axios.post(`${API_URL}/auth/register`, {
-                name,
-                email,
-                password,
+                ...user
             });
             console.log(response.data);
             Alert.alert("Success", response.data.message);
@@ -69,6 +70,15 @@ const AuthProvider = ({ children }) => {
                 password,
             });
 
+            if(response.status != '200'){
+                Alert.alert("Error", "Invalid Credentials")
+                return;
+            }
+            
+            if(response.status=='200') {
+                Alert.alert("Success", "Logged in successfully");;
+                console.log("Login response: ",response.data)
+            }
             const { accessToken, refreshToken } = response.data;
 
             setAuthState({
@@ -83,8 +93,6 @@ const AuthProvider = ({ children }) => {
 
             await SecureStore.setItemAsync(ACCESS_TOKEN_KEY, accessToken);
             await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, refreshToken);
-
-            Alert.alert("Success", "Logged in successfully");
             console.log(accessToken, refreshToken);
             
             return response;

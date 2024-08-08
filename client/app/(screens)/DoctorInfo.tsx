@@ -10,7 +10,7 @@ const DoctorInfo = () => {
     return (
         <SafeAreaView className="flex-1 bg-blue-50">
             <ScrollView className="p-4">
-                <View className="items-center mb-6">
+                <View className="items-center mb-6 mt-10">
                     <Image
                         source={{
                             uri: `https://randomuser.me/api/portraits/${

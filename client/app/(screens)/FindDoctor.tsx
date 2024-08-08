@@ -105,7 +105,7 @@ const FindDoctor = () => {
     : doctors;
 
   return (
-    <SafeAreaView className="flex-1 bg-[#F9FAFB] p-3">
+    <SafeAreaView className="flex-1 bg-blue-50 p-3">
       <View className="bg-white p-5 rounded-lg mb-5 mt-8 w-full">
         <Text className="text-[#1D4ED8] text-2xl font-bold mb-4">
           Find Doctors

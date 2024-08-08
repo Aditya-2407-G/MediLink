@@ -12,13 +12,7 @@ const DoctorInfo = () => {
             <ScrollView className="p-4">
                 <View className="items-center mb-6 mt-10">
                     <Image
-                        source={{
-                            uri: `https://randomuser.me/api/portraits/${
-                                doctor.doctorName.toLowerCase().includes("dr.")
-                                    ? "men"
-                                    : "women"
-                            }/${Math.floor(Math.random() * 60) + 1}.jpg`,
-                        }}
+                        source={require("@/assets/images/avatar6.png")}
                         className="w-32 h-32 rounded-full"
                     />
                     <Text className="font-poppins-bold text-blue-700 text-2xl mt-4">
@@ -29,6 +23,14 @@ const DoctorInfo = () => {
                     </Text>
                 </View>
 
+                <View className="bg-white p-4 rounded-2xl shadow-md mb-4">
+                    <Text className="font-poppins-bold text-blue-700 text-lg mb-2">
+                        Experience
+                    </Text>
+                    <Text className="text-gray-600 font-poppins-regular">
+                        {doctor.experience} Years
+                    </Text>
+                </View>
                 <View className="bg-white p-4 rounded-2xl shadow-md mb-4">
                     <Text className="font-poppins-bold text-blue-700 text-lg mb-2">
                         Hospital
@@ -61,8 +63,6 @@ const DoctorInfo = () => {
                         ₹{doctor.fees}
                     </Text>
                 </View>
-
-                {/* Add more sections as needed for additional doctor details */}
             </ScrollView>
         </SafeAreaView>
     );

@@ -32,7 +32,7 @@ const SignIn = () => {
 
     const togglePasswordVisibility = () => {
         setIsPasswordVisible(!isPasswordVisible);
-    }
+    };
 
     const handleSignIn = async (values: Values) => {
         try {

@@ -17,7 +17,6 @@ import * as Yup from "yup";
 import { Link } from "expo-router";
 import { useAuth } from "@/context/AuthContext";
 import { Ionicons, FontAwesome6 } from "@expo/vector-icons";
-import { GetLocation } from "@/components/GetLocation";
 import * as Location from "expo-location";
 
 const formSchema = Yup.object().shape({
@@ -83,6 +82,22 @@ const formSchema = Yup.object().shape({
             return role !== "doctor" || (value && value.trim().length > 0);
         }
     ),
+    licence: Yup.string().test(
+        "required-if-doctor",
+        "Licence is required",
+        function (value) {
+            const { role } = this.parent;
+            return role !== "doctor" || (value && value.trim().length > 0);
+        }
+    ),
+    experience: Yup.number().test(
+        "required-if-doctor",
+        "Experience is required",
+        function (value) {
+            const { role } = this.parent;
+            return role !== "doctor" || (value !== undefined && value >= 0);
+        }
+    ),
 });
 
 interface Values {
@@ -99,6 +114,8 @@ interface Values {
     country?: string;
     latitude?: string;
     longitude?: string;
+    licence?: string;
+    experience?: string;
 }
 
 const SignUp = () => {
@@ -132,7 +149,7 @@ const SignUp = () => {
         GetLocationPermission();
     }, []);
 
-    const GetLocation = async (SetLocation, setFieldValue) => {
+    const GetLocation = async (setFieldValue) => {
         try {
             // Check if location permission is granted
             const { status } = await Location.getForegroundPermissionsAsync();
@@ -173,6 +190,8 @@ const SignUp = () => {
                 country: values.country,
                 latitude: values.latitude,
                 longitude: values.longitude,
+                licence: values.licence,
+                experience: values.experience,
             };
 
             console.log("Registering user with details:", userDetails);
@@ -210,7 +229,7 @@ const SignUp = () => {
                 >
                     <View className="bg-white rounded-3xl p-6 px-5 shadow-lg">
                         <View className="items-center">
-                            <Text className="text-blue-700 text-4xl mb-2 text-center font-poppins-bold">
+                            <Text className="text-blue-700 text-4xl mb-2 text-center -poppifontns-bold">
                                 Create Account
                             </Text>
                             <Text className="text-blue-600 text-xl mb-8 text-center font-poppins-regular">
@@ -234,6 +253,8 @@ const SignUp = () => {
                                 country: "",
                                 latitude: "",
                                 longitude: "",
+                                licence: "",
+                                experience: "",
                             }}
                             validationSchema={formSchema}
                             onSubmit={(values: Values) => {
@@ -408,6 +429,50 @@ const SignUp = () => {
                                     </View>
                                     {values.role === "doctor" && (
                                         <View className="mt-5 space-y-5">
+                                            <View className="flex flex-col">
+                                                <Text className="text-blue-700 font-poppins-semibold mb-2 text-lg">
+                                                    License
+                                                </Text>
+                                                <TextInput
+                                                    className="border border-blue-300 rounded-lg p-4 bg-blue-50 text-lg font-poppins-regular"
+                                                    placeholder="ANS123456"
+                                                    onChangeText={handleChange(
+                                                        "licence"
+                                                    )}
+                                                    onBlur={handleBlur(
+                                                        "licence"
+                                                    )}
+                                                    value={values.licence}
+                                                />
+                                                {touched.licence &&
+                                                    errors.licence && (
+                                                        <Text className="text-red-500 mt-1 font-poppins-regular">
+                                                            {errors.licence}
+                                                        </Text>
+                                                    )}
+                                            </View>
+                                            <View className="flex flex-col">
+                                                <Text className="text-blue-700 font-poppins-semibold mb-2 text-lg">
+                                                    Years of Experience
+                                                </Text>
+                                                <TextInput
+                                                    className="border border-blue-300 rounded-lg p-4 bg-blue-50 text-lg font-poppins-regular"
+                                                    placeholder="..."
+                                                    onChangeText={handleChange(
+                                                        "experience"
+                                                    )}
+                                                    onBlur={handleBlur(
+                                                        "experience"
+                                                    )}
+                                                    value={values.experience}
+                                                />
+                                                {touched.experience &&
+                                                    errors.experience && (
+                                                        <Text className="text-red-500 mt-1 font-poppins-regular">
+                                                            {errors.experience}
+                                                        </Text>
+                                                    )}
+                                            </View>
                                             <View className="flex flex-col">
                                                 <Text className="text-blue-700 font-poppins-semibold mb-2 text-lg">
                                                     Hospital Name
@@ -594,10 +659,7 @@ const SignUp = () => {
                                             <TouchableOpacity
                                                 className="bg-blue-700 p-4 rounded-lg"
                                                 onPress={() =>
-                                                    GetLocation(
-                                                        setLocation,
-                                                        setFieldValue
-                                                    )
+                                                    GetLocation(setFieldValue)
                                                 }
                                             >
                                                 <Text className="text-white text-center text-lg font-poppins-semibold">
@@ -616,7 +678,7 @@ const SignUp = () => {
                                         handlePress={handleSubmit}
                                         containerStyles="w-full bg-blue-700 p-4 rounded-lg mt-6"
                                         textStyles=" text-white text-center font-poppins-semibold text-xl"
-                                        isLoading={undefined}
+                                        isLoading={loading}
                                     />
                                 </View>
                             )}

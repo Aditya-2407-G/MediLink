@@ -1,24 +1,30 @@
-import bcrypt from 'bcryptjs';
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { User } from "../models/User.js";
 import { createAccessToken, createRefreshToken } from "../utils/token.js";
-import { Doctor } from '../models/Doctor.js';
-import {exec} from 'child_process'
-import util from 'util'
+import { Doctor } from "../models/Doctor.js";
+import { exec } from "child_process";
+import util from "util";
 
 const execPromise = util.promisify(exec);
 
 async function generateEmbeddings(text) {
     try {
-        const env = { ...process.env, HF_HUB_DISABLE_SYMLINKS_WARNING: '1' };
-        const { stdout, stderr } = await execPromise(`call ../.venv/Scripts/activate && python ./src/utils/generate_embeddings.py "${text}"`,{env});
+        const env = { ...process.env, HF_HUB_DISABLE_SYMLINKS_WARNING: "1" };
+        const { stdout, stderr } = await execPromise(
+            `call ../.venv/Scripts/activate && python ./src/utils/generate_embeddings.py "${text}"`,
+            { env }
+        );
         if (stderr) {
             console.error(`Error: ${stderr}`);
             return null;
         }
         const vector = JSON.parse(stdout);
-        if (!Array.isArray(vector) || !vector.every(num => typeof num === 'number')) {
-            throw new Error('Invalid vector format');
+        if (
+            !Array.isArray(vector) ||
+            !vector.every((num) => typeof num === "number")
+        ) {
+            throw new Error("Invalid vector format");
         }
         return vector;
     } catch (error) {
@@ -30,7 +36,23 @@ async function generateEmbeddings(text) {
 export const register = async (req, res) => {
     console.log("Regiester function called");
     try {
-        const { name, email, password, role, hospitalName, hospitalAddress, specialization, fees, city, state, country, latitude, longitude } = req.body;
+        const {
+            name,
+            email,
+            password,
+            role,
+            hospitalName,
+            hospitalAddress,
+            specialization,
+            fees,
+            city,
+            state,
+            country,
+            latitude,
+            longitude,
+            licence,
+            experience,
+        } = req.body;
 
         if ([name, email, password].some((field) => field?.trim() === "")) {
             return res.status(400).json({ message: "Please Fill All Fields" });
@@ -39,7 +61,9 @@ export const register = async (req, res) => {
         const existedUser = await User.findOne({ email });
 
         if (existedUser) {
-            return res.status(400).json({ message: "User with same email already exists" });
+            return res
+                .status(400)
+                .json({ message: "User with same email already exists" });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -57,7 +81,7 @@ export const register = async (req, res) => {
             const doctorText = `Doctor ${name}, speacializing in ${specialization} sits at ${hospitalName}, ${hospitalAddress}, ${city}, ${state}, ${country}`;
             // Generate embeddings using the Python script
             const vector = await generateEmbeddings(doctorText);
-            console.log("doctor created with vector")
+            console.log("doctor created with vector");
 
             const doctor = new Doctor({
                 user_id: user._id,
@@ -69,22 +93,27 @@ export const register = async (req, res) => {
                 city,
                 state,
                 country,
-                latitude:parseFloat(latitude),
-                longitude:parseFloat(longitude),
-                vector
+                location: {
+                    type: "Point",
+                    coordinates: [parseFloat(longitude), parseFloat(latitude)], // [longitude, latitude]
+                },
+                vector,
+                licence,
+                experience: parseInt(experience),
             });
+            console.log("DOCTOR IS: ", doctor);
             await doctor.save();
-            return res.status(201).json({ message: "Doctor Registered Successfully" });
+            return res
+                .status(201)
+                .json({ message: "Doctor Registered Successfully" });
         }
         // Send response only once
         return res.status(201).json({ message: "User Created Successfully" });
-
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: "Error Creating User" });
     }
 };
-
 
 export const login = async (req, res) => {
     console.log("Sign in called");
@@ -125,7 +154,7 @@ export const login = async (req, res) => {
             httpOnly: true,
             secure: true,
         };
-        
+
         res.status(200)
             .cookie("accessToken", accessToken, options)
             .cookie("refreshToken", refreshToken, options)
@@ -138,17 +167,21 @@ export const login = async (req, res) => {
                     email: userObj.email,
                     role: userObj.role,
                     // Include doctor details if available
-                    doctorDetails: userObj.doctorName ? {
-                        doctorName: userObj.doctorName,
-                        hospitalName: userObj.hospitalName,
-                        hospitalAddress: userObj.hospitalAddress,
-                        specialization: userObj.specialization,
-                        fees: userObj.fees,
-                        city: userObj.city,
-                        state: userObj.state,
-                        country: userObj.country,
-                    } : null,
-                },  
+                    doctorDetails: userObj.doctorName
+                        ? {
+                              doctorName: userObj.doctorName,
+                              hospitalName: userObj.hospitalName,
+                              hospitalAddress: userObj.hospitalAddress,
+                              specialization: userObj.specialization,
+                              fees: userObj.fees,
+                              city: userObj.city,
+                              state: userObj.state,
+                              country: userObj.country,
+                              licence: userObj.licence,
+                              experience: userObj.experience,
+                          }
+                        : null,
+                },
             });
     } catch (error) {
         console.log(error);
@@ -166,7 +199,7 @@ export const refresh = async (req, res) => {
 
         const decoded = jwt.verify(
             refreshToken,
-            process.env.REFRESH_TOKEN_SECRET
+            process.env.EXPO_PUBLIC_REFRESH_TOKEN_SECRET
         );
 
         const user = await User.findById(decoded.userId);

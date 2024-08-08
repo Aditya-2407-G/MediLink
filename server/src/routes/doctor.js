@@ -1,10 +1,10 @@
 import express from 'express';
-import { register, login, refresh, logout } from "../controllers/authController.js"
-import {findDoctor} from "../controllers/doctorController.js"
+import {findDoctor, tempDoctorData} from "../controllers/doctorController.js"
 
 const router = express.Router();
 
 router.get('/search', findDoctor)
 
+router.get('/temp-doctor-data', tempDoctorData)
 
 export default router;

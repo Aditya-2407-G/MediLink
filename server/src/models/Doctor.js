@@ -72,15 +72,9 @@ const doctorSchema = Schema(
         },
 
         // Latitude of the doctor's location
-        latitude: {
-            type: Number,
-            required: true,
-        },
-
-        // Longitude of the doctor's location
-        longitude: {
-            type: Number,
-            required: true,
+        location: {
+            type: { type: String },
+            coordinates: [Number],
         },
 
         //Text embedded vector of doctor for search purpose
@@ -88,10 +82,34 @@ const doctorSchema = Schema(
             type: [Number],
             required: true,
         },
+
+        //Take doctor licence number as input
+        licence: {
+            type: String,
+            required: true,
+        },
+
+        //Take doctor's experience as input
+        experience: {
+            type: Number,
+            required: true,
+        },
+
+        profilePhoto: {
+            type: String,
+            required: true,
+            default: () =>
+                `https://randomuser.me/api/portraits/${Math.floor(
+                    Math.random() * 100
+                )}.jpg`,
+        },
     },
     { strict: false },
     { timestamp: true } // Allow fields not specified in the schema
 );
+
+// create 2d sphere index
+doctorSchema.index({ location: "2dsphere" });
 
 // Export the Doctor model based on the schema
 export const Doctor = mongoose.model("Doctor", doctorSchema);

@@ -16,7 +16,7 @@ import CustomButton from "@/components/CustomButton";
 import * as Yup from "yup";
 import { Link } from "expo-router";
 import { useAuth } from "@/context/AuthContext";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, FontAwesome6 } from "@expo/vector-icons";
 
 const formSchema = Yup.object().shape({
     name: Yup.string().required("Name is required"),
@@ -329,8 +329,8 @@ const SignUp = () => {
                                                         : "border-gray-300"
                                                 }`}
                                             >
-                                                <Ionicons
-                                                    name="medical"
+                                                <FontAwesome6
+                                                    name="user-doctor"
                                                     size={24}
                                                     color={
                                                         values.role === "doctor"

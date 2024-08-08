@@ -70,6 +70,10 @@ const doctorSchema = Schema(
             min: 6,
             max: 255,
         },
+        vector: {
+            type: [Number],
+            required: true,
+        },
     },
     { strict: false },
     { timestamp: true } // Allow fields not specified in the schema

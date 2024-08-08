@@ -14,6 +14,12 @@ const ScreenLayout = () => {
                         headerShown: false,
                     }}
                 />
+                <Stack.Screen
+                    name="DoctorInfo"
+                    options={{
+                        headerShown: false,
+                    }}
+                />
             </Stack>
         </>
     );

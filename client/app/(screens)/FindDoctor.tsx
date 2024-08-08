@@ -11,10 +11,13 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
 import { debounce } from 'lodash';
+import { useNavigation } from "@react-navigation/native";
 
 const API_URL = "http://192.168.29.57:8000";
 
 const FindDoctor = () => {
+
+    const navigation = useNavigation();
     const [doctors, setDoctors] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
 
@@ -45,7 +48,10 @@ const FindDoctor = () => {
     };
 
     const renderDoctorItem = ({ item }) => (
-        <TouchableOpacity className="bg-white p-4 rounded-2xl shadow-md mb-4">
+        <TouchableOpacity className="bg-white p-4 rounded-2xl shadow-md mb-4"
+        //@ts-ignore 
+        onPress={() => navigation.navigate('DoctorInfo', {doctor : item})} 
+        >
             <View className="flex-row items-center mb-3">
                 <Image
                     source={{

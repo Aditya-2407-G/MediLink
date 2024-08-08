@@ -3,6 +3,29 @@ import jwt from "jsonwebtoken";
 import { User } from "../models/User.js";
 import { createAccessToken, createRefreshToken } from "../utils/token.js";
 import { Doctor } from '../models/Doctor.js';
+import {exec} from 'child_process'
+import util from 'util'
+
+const execPromise = util.promisify(exec);
+
+async function generateEmbeddings(text) {
+    try {
+        const env = { ...process.env, HF_HUB_DISABLE_SYMLINKS_WARNING: '1' };
+        const { stdout, stderr } = await execPromise(`call ../.venv/Scripts/activate && python ./src/utils/generate_embeddings.py "${text}"`,{env});
+        if (stderr) {
+            console.error(`Error: ${stderr}`);
+            return null;
+        }
+        const vector = JSON.parse(stdout);
+        if (!Array.isArray(vector) || !vector.every(num => typeof num === 'number')) {
+            throw new Error('Invalid vector format');
+        }
+        return vector;
+    } catch (error) {
+        console.error(`Exec error: ${error}`);
+        return null;
+    }
+}
 
 export const register = async (req, res) => {
     console.log("Regiester function called");
@@ -31,6 +54,11 @@ export const register = async (req, res) => {
 
         if (role.toLocaleLowerCase() === "doctor") {
             console.log("We are adding doctor");
+            const doctorText = `Doctor ${name}, speacializing in ${specialization} sits at ${hospitalName}, ${hospitalAddress}, ${city}, ${state}, ${country}`;
+            // Generate embeddings using the Python script
+            const vector = await generateEmbeddings(doctorText);
+            console.log("doctor created with vector")
+
             const doctor = new Doctor({
                 user_id: user._id,
                 doctorName: name,
@@ -40,7 +68,8 @@ export const register = async (req, res) => {
                 fees,
                 city,
                 state,
-                country
+                country,
+                vector
             });
             await doctor.save();
             return res.status(201).json({ message: "Doctor Registered Successfully" });

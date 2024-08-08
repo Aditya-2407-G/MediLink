@@ -8,8 +8,9 @@ import {
     TouchableOpacity,
     KeyboardAvoidingView,
     Platform,
+    Image,
 } from "react-native";
-import React, {useState} from "react";
+import React, { useState } from "react";
 import { Formik } from "formik";
 import CustomButton from "@/components/CustomButton";
 import * as Yup from "yup";
@@ -98,8 +99,13 @@ interface Values {
 
 const SignUp = () => {
     const [loading, setLoading] = useState(false);
+    const [isPasswordVisible, setIsPasswordVisible] = useState(false);
     const { register }: any = useAuth();
-    
+
+    const togglePasswordVisibility = () => {
+        setIsPasswordVisible((prev) => !prev);
+    };
+
     const handleSignUp = async (values: Values) => {
         console.log("handleSignUp function called with values:", values);
         setLoading(true);
@@ -117,24 +123,14 @@ const SignUp = () => {
                 state: values.state,
                 country: values.country,
             };
-    
-            // if (values.role === "doctor") {
-            //     userDetails = {
-            //         ...userDetails,
-            //         hospitalName: values.hospitalName,
-            //         hospitalAddress: values.hospitalAddress,
-            //         specialization: values.specialization,
-            //         fees: values.fees,
-            //         city: values.city,
-            //         state: values.state,
-            //         country: values.country,
-            //     };
-            // }
-    
+
             console.log("Registering user with details:", userDetails);
             await register(userDetails);
             console.log("Registration successful");
-            Alert.alert("Sign Up Successful", "Your account has been created successfully.");
+            Alert.alert(
+                "Sign Up Successful",
+                "Your account has been created successfully."
+            );
         } catch (error) {
             console.error("Error signing up:", error);
             Alert.alert(
@@ -163,10 +159,10 @@ const SignUp = () => {
                 >
                     <View className="bg-white rounded-3xl p-6 px-5 shadow-lg">
                         <View className="items-center">
-                            <Text className="text-blue-700 text-4xl mb-2 text-center font-extrabold">
+                            <Text className="text-blue-700 text-4xl mb-2 text-center font-poppins-bold">
                                 Create Account
                             </Text>
-                            <Text className="text-blue-600 text-xl mb-8 text-center">
+                            <Text className="text-blue-600 text-xl mb-8 text-center font-poppins-regular">
                                 Join our community of health professionals and
                                 patients
                             </Text>
@@ -187,7 +183,9 @@ const SignUp = () => {
                                 country: "",
                             }}
                             validationSchema={formSchema}
-                            onSubmit={(values:Values) => {handleSignUp(values)}}
+                            onSubmit={(values: Values) => {
+                                handleSignUp(values);
+                            }}
                         >
                             {({
                                 handleChange,
@@ -200,28 +198,28 @@ const SignUp = () => {
                             }) => (
                                 <View className="space-y-5">
                                     <View className="flex flex-col">
-                                        <Text className="text-blue-700 font-semibold mb-2 text-lg">
+                                        <Text className="text-blue-700 font-poppins-semibold mb-2 text-lg">
                                             Name
                                         </Text>
                                         <TextInput
-                                            className="border border-blue-300 rounded-lg p-4 bg-blue-50 text-lg"
+                                            className="border border-blue-300 rounded-lg p-4 bg-blue-50 text-lg font-poppins-regular"
                                             placeholder="John Doe"
                                             onChangeText={handleChange("name")}
                                             onBlur={handleBlur("name")}
                                             value={values.name}
                                         />
                                         {touched.name && errors.name && (
-                                            <Text className="text-red-500 mt-1">
+                                            <Text className="text-red-500 mt-1 font-poppins-regular">
                                                 {errors.name}
                                             </Text>
                                         )}
                                     </View>
                                     <View>
-                                        <Text className="text-blue-700 font-semibold mb-2 text-lg">
+                                        <Text className="text-blue-700 font-poppins-semibold mb-2 text-lg">
                                             Email
                                         </Text>
                                         <TextInput
-                                            className="border border-blue-300 rounded-lg p-4 bg-blue-50 text-lg"
+                                            className="border border-blue-300 rounded-lg p-4 bg-blue-50 text-lg font-poppins-regular"
                                             placeholder="johndoe@example.com"
                                             onChangeText={handleChange("email")}
                                             onBlur={handleBlur("email")}
@@ -230,34 +228,56 @@ const SignUp = () => {
                                             autoCapitalize="none"
                                         />
                                         {touched.email && errors.email && (
-                                            <Text className="text-red-500 mt-1">
+                                            <Text className="text-red-500 mt-1 font-poppins-regular">
                                                 {errors.email}
                                             </Text>
                                         )}
                                     </View>
                                     <View>
-                                        <Text className="text-blue-700 font-semibold mb-2 text-lg">
+                                        <Text className="text-blue-700 font-poppins-semibold mb-2 text-lg">
                                             Password
                                         </Text>
-                                        <TextInput
-                                            className="border border-blue-300 rounded-lg p-4 bg-blue-50 text-lg"
-                                            secureTextEntry
-                                            placeholder="••••••••"
-                                            onChangeText={handleChange(
-                                                "password"
-                                            )}
-                                            onBlur={handleBlur("password")}
-                                            value={values.password}
-                                        />
+                                        <View className="relative flex-row items-center">
+                                            <TextInput
+                                                className="flex-1 border border-blue-300 rounded-lg p-4 bg-blue-50 text-lg font-poppins-regular pr-12"
+                                                secureTextEntry={
+                                                    !isPasswordVisible
+                                                }
+                                                placeholder="••••••••"
+                                                onChangeText={handleChange(
+                                                    "password"
+                                                )}
+                                                onBlur={handleBlur("password")}
+                                                value={values.password}
+                                            />
+                                            <TouchableOpacity
+                                                onPress={
+                                                    togglePasswordVisibility
+                                                }
+                                                className="absolute right-4"
+                                            >
+                                                <Image
+                                                    source={
+                                                        isPasswordVisible
+                                                            ? require("@/assets/icons/eye-hide.png")
+                                                            : require("@/assets/icons/eye.png")
+                                                    }
+                                                    style={{
+                                                        width: 24,
+                                                        height: 24,
+                                                    }}
+                                                />
+                                            </TouchableOpacity>
+                                        </View>
                                         {touched.password &&
                                             errors.password && (
-                                                <Text className="text-red-500 mt-1">
+                                                <Text className="text-red-500 mt-1 font-poppins-regular">
                                                     {errors.password}
                                                 </Text>
                                             )}
                                     </View>
                                     <View>
-                                        <Text className="text-blue-700 font-semibold mb-2 text-lg">
+                                        <Text className="text-blue-700 font-poppins-semibold mb-2 text-lg">
                                             I am a
                                         </Text>
                                         <View className="flex-row space-x-4">
@@ -287,9 +307,9 @@ const SignUp = () => {
                                                     }}
                                                 />
                                                 <Text
-                                                    className={`text-center mt-2 ${
+                                                    className={`text-center mt-2 font-poppins-regular ${
                                                         values.role === "user"
-                                                            ? "text-blue-700 font-semibold"
+                                                            ? "text-blue-700 font-poppins-semibold"
                                                             : "text-gray-700"
                                                     }`}
                                                 >
@@ -322,9 +342,9 @@ const SignUp = () => {
                                                     }}
                                                 />
                                                 <Text
-                                                    className={`text-center mt-2 ${
+                                                    className={`text-center mt-2 font-poppins-regular ${
                                                         values.role === "doctor"
-                                                            ? "text-blue-700 font-semibold"
+                                                            ? "text-blue-700 font-poppins-semibold"
                                                             : "text-gray-700"
                                                     }`}
                                                 >
@@ -336,11 +356,11 @@ const SignUp = () => {
                                     {values.role === "doctor" && (
                                         <View className="mt-5 space-y-5">
                                             <View className="flex flex-col">
-                                                <Text className="text-blue-700 font-semibold mb-2 text-lg">
+                                                <Text className="text-blue-700 font-poppins-semibold mb-2 text-lg">
                                                     Hospital Name
                                                 </Text>
                                                 <TextInput
-                                                    className="border border-blue-300 rounded-lg p-4 bg-blue-50 text-lg"
+                                                    className="border border-blue-300 rounded-lg p-4 bg-blue-50 text-lg font-poppins-regular"
                                                     placeholder="ABC Hospital"
                                                     onChangeText={handleChange(
                                                         "hospitalName"
@@ -352,7 +372,7 @@ const SignUp = () => {
                                                 />
                                                 {touched.hospitalName &&
                                                     errors.hospitalName && (
-                                                        <Text className="text-red-500 mt-1">
+                                                        <Text className="text-red-500 mt-1 font-poppins-regular">
                                                             {
                                                                 errors.hospitalName
                                                             }
@@ -360,11 +380,11 @@ const SignUp = () => {
                                                     )}
                                             </View>
                                             <View className="flex flex-col">
-                                                <Text className="text-blue-700 font-semibold mb-2 text-lg">
+                                                <Text className="text-blue-700 font-poppins-semibold mb-2 text-lg">
                                                     Hospital Address
                                                 </Text>
                                                 <TextInput
-                                                    className="border border-blue-300 rounded-lg p-4 bg-blue-50 text-lg"
+                                                    className="border border-blue-300 rounded-lg p-4 bg-blue-50 text-lg font-poppins-regular"
                                                     placeholder="123 Street, City"
                                                     onChangeText={handleChange(
                                                         "hospitalAddress"
@@ -378,7 +398,7 @@ const SignUp = () => {
                                                 />
                                                 {touched.hospitalAddress &&
                                                     errors.hospitalAddress && (
-                                                        <Text className="text-red-500 mt-1">
+                                                        <Text className="text-red-500 mt-1 font-poppins-regular">
                                                             {
                                                                 errors.hospitalAddress
                                                             }
@@ -386,11 +406,11 @@ const SignUp = () => {
                                                     )}
                                             </View>
                                             <View className="flex flex-col">
-                                                <Text className="text-blue-700 font-semibold mb-2 text-lg">
+                                                <Text className="text-blue-700 font-poppins-semibold mb-2 text-lg">
                                                     Specialization
                                                 </Text>
                                                 <TextInput
-                                                    className="border border-blue-300 rounded-lg p-4 bg-blue-50 text-lg"
+                                                    className="border border-blue-300 rounded-lg p-4 bg-blue-50 text-lg font-poppins-regular"
                                                     placeholder="Cardiology"
                                                     onChangeText={handleChange(
                                                         "specialization"
@@ -404,7 +424,7 @@ const SignUp = () => {
                                                 />
                                                 {touched.specialization &&
                                                     errors.specialization && (
-                                                        <Text className="text-red-500 mt-1">
+                                                        <Text className="text-red-500 mt-1 font-poppins-regular">
                                                             {
                                                                 errors.specialization
                                                             }
@@ -412,11 +432,11 @@ const SignUp = () => {
                                                     )}
                                             </View>
                                             <View className="flex flex-col">
-                                                <Text className="text-blue-700 font-semibold mb-2 text-lg">
+                                                <Text className="text-blue-700 font-poppins-semibold mb-2 text-lg">
                                                     Fees
                                                 </Text>
                                                 <TextInput
-                                                    className="border border-blue-300 rounded-lg p-4 bg-blue-50 text-lg"
+                                                    className="border border-blue-300 rounded-lg p-4 bg-blue-50 text-lg font-poppins-regular"
                                                     placeholder="100"
                                                     keyboardType="numeric"
                                                     onChangeText={handleChange(
@@ -427,17 +447,17 @@ const SignUp = () => {
                                                 />
                                                 {touched.fees &&
                                                     errors.fees && (
-                                                        <Text className="text-red-500 mt-1">
+                                                        <Text className="text-red-500 mt-1 font-poppins-regular">
                                                             {errors.fees}
                                                         </Text>
                                                     )}
                                             </View>
                                             <View className="flex flex-col">
-                                                <Text className="text-blue-700 font-semibold mb-2 text-lg">
+                                                <Text className="text-blue-700 font-poppins-semibold mb-2 text-lg">
                                                     City
                                                 </Text>
                                                 <TextInput
-                                                    className="border border-blue-300 rounded-lg p-4 bg-blue-50 text-lg"
+                                                    className="border border-blue-300 rounded-lg p-4 bg-blue-50 text-lg font-poppins-regular"
                                                     placeholder="City"
                                                     onChangeText={handleChange(
                                                         "city"
@@ -447,17 +467,17 @@ const SignUp = () => {
                                                 />
                                                 {touched.city &&
                                                     errors.city && (
-                                                        <Text className="text-red-500 mt-1">
+                                                        <Text className="text-red-500 mt-1 font-poppins-regular">
                                                             {errors.city}
                                                         </Text>
                                                     )}
                                             </View>
                                             <View className="flex flex-col">
-                                                <Text className="text-blue-700 font-semibold mb-2 text-lg">
+                                                <Text className="text-blue-700 font-poppins-semibold mb-2 text-lg">
                                                     State
                                                 </Text>
                                                 <TextInput
-                                                    className="border border-blue-300 rounded-lg p-4 bg-blue-50 text-lg"
+                                                    className="border border-blue-300 rounded-lg p-4 bg-blue-50 text-lg font-poppins-regular"
                                                     placeholder="State"
                                                     onChangeText={handleChange(
                                                         "state"
@@ -467,17 +487,17 @@ const SignUp = () => {
                                                 />
                                                 {touched.state &&
                                                     errors.state && (
-                                                        <Text className="text-red-500 mt-1">
+                                                        <Text className="text-red-500 mt-1 font-poppins-regular">
                                                             {errors.state}
                                                         </Text>
                                                     )}
                                             </View>
                                             <View className="flex flex-col">
-                                                <Text className="text-blue-700 font-semibold mb-2 text-lg">
+                                                <Text className="text-blue-700 font-poppins-semibold mb-2 text-lg">
                                                     Country
                                                 </Text>
                                                 <TextInput
-                                                    className="border border-blue-300 rounded-lg p-4 bg-blue-50 text-lg"
+                                                    className="border border-blue-300 rounded-lg p-4 bg-blue-50 text-lg font-poppins-regular"
                                                     placeholder="Country"
                                                     onChangeText={handleChange(
                                                         "country"
@@ -489,7 +509,7 @@ const SignUp = () => {
                                                 />
                                                 {touched.country &&
                                                     errors.country && (
-                                                        <Text className="text-red-500 mt-1">
+                                                        <Text className="text-red-500 mt-1 font-poppins-regular">
                                                             {errors.country}
                                                         </Text>
                                                     )}
@@ -500,7 +520,7 @@ const SignUp = () => {
                                         title="Sign Up"
                                         handlePress={handleSubmit}
                                         containerStyles="w-full bg-blue-600 p-4 rounded-lg mt-6"
-                                        textStyles="text-white text-center font-bold text-xl"
+                                        textStyles="text-white text-center font-bold text-xl font-poppins-regular"
                                         isLoading={undefined}
                                     />
                                 </View>
@@ -508,12 +528,12 @@ const SignUp = () => {
                         </Formik>
 
                         <View className="flex-row justify-center mt-8">
-                            <Text className="text-lg text-gray-500">
+                            <Text className="text-lg text-gray-500 font-poppins-regular">
                                 Already have an account?{" "}
                             </Text>
                             <Link href="/SignIn" asChild>
                                 <TouchableOpacity>
-                                    <Text className="text-lg text-blue-700 font-semibold">
+                                    <Text className="text-lg text-blue-700 font-poppins-semibold">
                                         Sign In
                                     </Text>
                                 </TouchableOpacity>

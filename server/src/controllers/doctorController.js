@@ -1,4 +1,3 @@
-import mongoose from 'mongoose';
 import {Doctor} from '../models/Doctor.js';
 
 // Search function using regex

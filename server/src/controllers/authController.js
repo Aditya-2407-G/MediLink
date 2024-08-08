@@ -117,7 +117,7 @@ export const login = async (req, res) => {
                         state: userObj.state,
                         country: userObj.country,
                     } : null,
-                },
+                },  
             });
     } catch (error) {
         console.log(error);

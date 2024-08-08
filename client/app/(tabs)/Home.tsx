@@ -11,22 +11,28 @@ import {
 } from "react-native";
 import { Ionicons, FontAwesome5 } from "@expo/vector-icons";
 import axios from "axios";
-import {debounce} from 'lodash'
+import { debounce } from "lodash";
+import { router} from "expo-router";
 
 const TAB_BAR_HEIGHT = 64;
 
 const Home = () => {
     // const API_URL = "http://192.168.0.174:8000";
     const API_URL = "http://192.168.29.57:8000";
-    const searchDoctors = useCallback(debounce(async (query) => {
-        console.log(`${API_URL}/doctor/search?query=${query}`)
-        try {
-            const response = await axios.get(`${API_URL}/doctor/search?searchTerm=${query}`);
-            console.log(response.data); 
-        } catch (error) {
-            console.error('Error searching for doctors:', error);
-        }
-    }, 300), []); 
+    const searchDoctors = useCallback(
+        debounce(async (query) => {
+            console.log(`${API_URL}/doctor/search?query=${query}`);
+            try {
+                const response = await axios.get(
+                    `${API_URL}/doctor/search?searchTerm=${query}`
+                );
+                console.log(response.data);
+            } catch (error) {
+                console.error("Error searching for doctors:", error);
+            }
+        }, 300),
+        []
+    );
 
     const handleSearchChange = (text) => {
         searchDoctors(text);
@@ -35,7 +41,11 @@ const Home = () => {
     return (
         <SafeAreaView className="flex-1 bg-blue-50">
             <ScrollView
-                contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', paddingBottom: TAB_BAR_HEIGHT }}
+                contentContainerStyle={{
+                    flexGrow: 1,
+                    justifyContent: "center",
+                    paddingBottom: TAB_BAR_HEIGHT,
+                }}
             >
                 {/* Header */}
                 <View className="bg-blue-600 p-10 rounded-b-3xl shadow-lg">
@@ -74,12 +84,25 @@ const Home = () => {
                 {/* Quick Actions */}
                 <View className="flex-row justify-around mx-4 my-6">
                     {[
-                        { icon: "user-md", title: "Find Doctors" },
+                        {
+                            icon: "user-md",
+                            title: "Find Doctors",
+                            screen: "FindDoctor",
+                        },
                         { icon: "calendar-check", title: "Appointments" },
                         { icon: "comments", title: "Consult Now" },
                         { icon: "file-medical-alt", title: "Health Records" },
                     ].map((item, index) => (
-                        <TouchableOpacity key={index} className="items-center">
+                        <TouchableOpacity
+                            key={index}
+                            className="items-center"
+                            onPress={() =>
+                                item.screen
+                                // @ts-ignore
+                                ? router.push(item.screen)
+                                    : null
+                            }
+                        >
                             <View className="bg-blue-100 p-4 rounded-2xl shadow-md">
                                 <FontAwesome5
                                     name={item.icon}

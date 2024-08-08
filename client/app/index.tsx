@@ -13,7 +13,7 @@ export default function Index() {
     // }
 
     return (
-        <SafeAreaView className="flex-1 ">
+        <SafeAreaView className="flex-1  ">
             <ScrollView contentContainerStyle={{ height: "100%" }}>
                 {/* @ts-ignore */}
                 <StatusBar backgroundColor="#161622" style="light" />
@@ -24,7 +24,7 @@ export default function Index() {
                     </Text>
                 </View>
 
-                <View className="flex items-center flex-row px-12 justify-between">
+                <View className="flex items-center flex-col m-10">
                     <CustomButton
                         title="Sign In"
                         handlePress={() => router.push("/SignIn")}
@@ -46,6 +46,14 @@ export default function Index() {
                         textStyles="text-xl text-white"
                         isLoading={undefined}
                     />
+                    <CustomButton
+                        title="Location"
+                        handlePress={() => router.push("/GetLocation")}
+                        containerStyles="bg-green-600 w-1/3"
+                        textStyles="text-xl text-white"
+                        isLoading={undefined}
+                    />
+
                 </View>
             </ScrollView>
         </SafeAreaView>

@@ -70,6 +70,20 @@ const doctorSchema = Schema(
             min: 6,
             max: 255,
         },
+
+        // Latitude of the doctor's location
+        latitude: {
+            type: Number,
+            required: true,
+        },
+
+        // Longitude of the doctor's location
+        longitude: {
+            type: Number,
+            required: true,
+        },
+
+        //Text embedded vector of doctor for search purpose
         vector: {
             type: [Number],
             required: true,

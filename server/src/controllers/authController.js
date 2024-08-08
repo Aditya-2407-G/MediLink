@@ -30,7 +30,7 @@ async function generateEmbeddings(text) {
 export const register = async (req, res) => {
     console.log("Regiester function called");
     try {
-        const { name, email, password, role, hospitalName, hospitalAddress, specialization, fees, city, state, country } = req.body;
+        const { name, email, password, role, hospitalName, hospitalAddress, specialization, fees, city, state, country, latitude, longitude } = req.body;
 
         if ([name, email, password].some((field) => field?.trim() === "")) {
             return res.status(400).json({ message: "Please Fill All Fields" });
@@ -69,6 +69,8 @@ export const register = async (req, res) => {
                 city,
                 state,
                 country,
+                latitude:parseFloat(latitude),
+                longitude:parseFloat(longitude),
                 vector
             });
             await doctor.save();

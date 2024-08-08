@@ -10,13 +10,15 @@ import {
     Platform,
     Image,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Formik } from "formik";
 import CustomButton from "@/components/CustomButton";
 import * as Yup from "yup";
 import { Link } from "expo-router";
 import { useAuth } from "@/context/AuthContext";
 import { Ionicons, FontAwesome6 } from "@expo/vector-icons";
+import { GetLocation } from "@/components/GetLocation";
+import * as Location from "expo-location";
 
 const formSchema = Yup.object().shape({
     name: Yup.string().required("Name is required"),
@@ -95,15 +97,62 @@ interface Values {
     city?: string;
     state?: string;
     country?: string;
+    latitude?: string;
+    longitude?: string;
 }
 
 const SignUp = () => {
     const [loading, setLoading] = useState(false);
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
     const { register }: any = useAuth();
+    const [location, setLocation] = useState(null);
 
     const togglePasswordVisibility = () => {
         setIsPasswordVisible((prev) => !prev);
+    };
+
+    useEffect(() => {
+        const GetLocationPermission = async () => {
+            try {
+                // Check if location permission is granted
+                const { status } =
+                    await Location.getForegroundPermissionsAsync();
+                if (status !== "granted") {
+                    const { status } =
+                        await Location.requestForegroundPermissionsAsync();
+                    if (status !== "granted") {
+                        console.log("Permission not granted");
+                        return;
+                    }
+                }
+            } catch (error) {
+                console.error("Error getting location:", error);
+            }
+        };
+        GetLocationPermission();
+    }, []);
+
+    const GetLocation = async (SetLocation, setFieldValue) => {
+        try {
+            // Check if location permission is granted
+            const { status } = await Location.getForegroundPermissionsAsync();
+            if (status !== "granted") {
+                const { status } =
+                    await Location.requestForegroundPermissionsAsync();
+                if (status !== "granted") {
+                    console.log("Permission not granted");
+                    return;
+                }
+            }
+            // Get the current location
+            const currentLocation = await Location.getCurrentPositionAsync({});
+            console.log(currentLocation["coords"]);
+            setLocation(currentLocation);
+            setFieldValue("latitude", currentLocation["coords"]["latitude"]);
+            setFieldValue("longitude", currentLocation["coords"]["longitude"]);
+        } catch (error) {
+            console.error("Error getting location:", error);
+        }
     };
 
     const handleSignUp = async (values: Values) => {
@@ -122,6 +171,8 @@ const SignUp = () => {
                 city: values.city,
                 state: values.state,
                 country: values.country,
+                latitude: values.latitude,
+                longitude: values.longitude,
             };
 
             console.log("Registering user with details:", userDetails);
@@ -181,6 +232,8 @@ const SignUp = () => {
                                 city: "",
                                 state: "",
                                 country: "",
+                                latitude: "",
+                                longitude: "",
                             }}
                             validationSchema={formSchema}
                             onSubmit={(values: Values) => {
@@ -514,13 +567,55 @@ const SignUp = () => {
                                                         </Text>
                                                     )}
                                             </View>
+
+                                            <View className="flex flex-col">
+                                                <Text className="text-blue-700 font-poppins-semibold mb-2 text-lg">
+                                                    Latitude
+                                                </Text>
+                                                <TextInput
+                                                    className="border border-blue-300 rounded-lg p-4 bg-blue-50 text-lg font-poppins-regular"
+                                                    placeholder="Latitude"
+                                                    value={values.latitude.toString()}
+                                                    editable={false}
+                                                />
+                                            </View>
+                                            <View className="flex flex-col">
+                                                <Text className="text-blue-700 font-poppins-semibold mb-2 text-lg">
+                                                    Longitude
+                                                </Text>
+                                                <TextInput
+                                                    className="border border-blue-300 rounded-lg p-4 bg-blue-50 text-lg font-poppins-regular"
+                                                    placeholder="Longitude"
+                                                    value={values.longitude.toString()}
+                                                    editable={false}
+                                                />
+                                            </View>
+
+                                            <TouchableOpacity
+                                                className="bg-blue-700 p-4 rounded-lg"
+                                                onPress={() =>
+                                                    GetLocation(
+                                                        setLocation,
+                                                        setFieldValue
+                                                    )
+                                                }
+                                            >
+                                                <Text className="text-white text-center text-lg font-poppins-semibold">
+                                                    Get Location
+                                                </Text>
+                                            </TouchableOpacity>
+                                            <Text className="font-poppins-regular text-base text-justify text-neutral-500">
+                                                Please ensure to select the
+                                                location from where you will be
+                                                operating
+                                            </Text>
                                         </View>
                                     )}
                                     <CustomButton
                                         title="Sign Up"
                                         handlePress={handleSubmit}
-                                        containerStyles="w-full bg-blue-600 p-4 rounded-lg mt-6"
-                                        textStyles="text-white text-center font-bold text-xl font-poppins-regular"
+                                        containerStyles="w-full bg-blue-700 p-4 rounded-lg mt-6"
+                                        textStyles=" text-white text-center font-poppins-semibold text-xl"
                                         isLoading={undefined}
                                     />
                                 </View>

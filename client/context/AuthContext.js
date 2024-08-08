@@ -3,11 +3,6 @@ import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 import { Alert } from "react-native";
 
-const ACCESS_TOKEN_KEY = "accessToken";
-const REFRESH_TOKEN_KEY = "refreshToken";
-// export const API_URL = "http://192.168.1.6:8000";
-export const API_URL = "http://192.168.29.57:8000";
-
 // Create the AuthContext
 const AuthContext = createContext();
 
@@ -18,7 +13,6 @@ export const useAuth = () => {
 
 // AuthProvider component
 const AuthProvider = ({ children }) => {
-
     const [authState, setAuthState] = useState({
         accessToken: null,
         refreshToken: null,
@@ -27,18 +21,31 @@ const AuthProvider = ({ children }) => {
 
     useEffect(() => {
         const loadTokens = async () => {
-            const accessToken = await SecureStore.getItemAsync(ACCESS_TOKEN_KEY);
-            const refreshToken = await SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
-            if (accessToken && refreshToken) {
-                axios.defaults.headers.common[
-                    "Authorization"
-                ] = `Bearer ${accessToken}`;
-                setAuthState({
-                    accessToken,
-                    refreshToken,
-                    authenticated: true,
-                });
-            } else {
+            try {
+                const accessToken = await SecureStore.getItemAsync(
+                    process.env.EXPO_PUBLIC_ACCESS_TOKEN_SECRET
+                );
+                const refreshToken = await SecureStore.getItemAsync(
+                    process.env.EXPO_PUBLIC_REFRESH_TOKEN_SECRET
+                );
+                if (accessToken && refreshToken) {
+                    axios.defaults.headers.common[
+                        "Authorization"
+                    ] = `Bearer ${accessToken}`;
+                    setAuthState({
+                        accessToken,
+                        refreshToken,
+                        authenticated: true,
+                    });
+                } else {
+                    setAuthState({
+                        accessToken: null,
+                        refreshToken: null,
+                        authenticated: false,
+                    });
+                }
+            } catch (error) {
+                console.log(error);
                 setAuthState({
                     accessToken: null,
                     refreshToken: null,
@@ -51,10 +58,13 @@ const AuthProvider = ({ children }) => {
 
     const register = async (user) => {
         try {
-            console.log("USER BEING SENT IS: ",user)
-            const response = await axios.post(`${API_URL}/auth/register`, {
-                ...user
-            });
+            console.log("USER BEING SENT IS: ", user);
+            const response = await axios.post(
+                `${process.env.EXPO_PUBLIC_API_URL}/auth/register`,
+                {
+                    ...user,
+                }
+            );
             console.log(response.data);
             Alert.alert("Success", response.data.message);
         } catch (error) {
@@ -65,19 +75,22 @@ const AuthProvider = ({ children }) => {
 
     const login = async (email, password) => {
         try {
-            const response = await axios.post(`${API_URL}/auth/login`, {
-                email,
-                password,
-            });
+            const response = await axios.post(
+                `${process.env.EXPO_PUBLIC_API_URL}/auth/login`,
+                {
+                    email,
+                    password,
+                }
+            );
 
-            if(response.status != '200'){
-                Alert.alert("Error", "Invalid Credentials")
+            if (response.status != "200") {
+                Alert.alert("Error", "Invalid Credentials");
                 return;
             }
-            
-            if(response.status=='200') {
-                Alert.alert("Success", "Logged in successfully");;
-                console.log("Login response: ",response.data)
+
+            if (response.status == "200") {
+                Alert.alert("Success", "Logged in successfully");
+                console.log("Login response: ", response.data);
             }
             const { accessToken, refreshToken } = response.data;
 
@@ -91,10 +104,21 @@ const AuthProvider = ({ children }) => {
                 "Authorization"
             ] = `Bearer ${accessToken}`;
 
-            await SecureStore.setItemAsync(ACCESS_TOKEN_KEY, accessToken);
-            await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, refreshToken);
+            await SecureStore.setItemAsync(
+                process.env.EXPO_PUBLIC_ACCESS_TOKEN_SECRET,
+                accessToken
+            );
+            await SecureStore.setItemAsync(
+                process.env.EXPO_PUBLIC_REFRESH_TOKEN_SECRET,
+                refreshToken
+            );
             console.log(accessToken, refreshToken);
-            
+            console.log(
+                "hello",
+                process.env.EXPO_PUBLIC_ACCESS_TOKEN_SECRET,
+                process.env.EXPO_PUBLIC_REFRESH_TOKEN_SECRET
+            );
+
             return response;
         } catch (error) {
             Alert.alert("Error", error.response.data.message);
@@ -104,14 +128,20 @@ const AuthProvider = ({ children }) => {
 
     const refreshAccessToken = async () => {
         try {
-            const refreshToken = await SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
+            const refreshToken = await SecureStore.getItemAsync(
+                process.env.EXPO_PUBLIC_REFRESH_TOKEN_SECRET
+            );
             if (!refreshToken) throw new Error("No refresh token available");
 
-            const response = await axios.post(`${API_URL}/auth/refresh`, {
-                refreshToken,
-            });
+            const response = await axios.post(
+                `${process.env.EXPO_PUBLIC_API_URL}/auth/refresh`,
+                {
+                    refreshToken,
+                }
+            );
 
-            const { accessToken, refreshToken: newRefreshToken } = response.data;
+            const { accessToken, refreshToken: newRefreshToken } =
+                response.data;
 
             setAuthState((prevState) => ({
                 ...prevState,
@@ -123,19 +153,25 @@ const AuthProvider = ({ children }) => {
                 "Authorization"
             ] = `Bearer ${accessToken}`;
 
-            await SecureStore.setItemAsync(ACCESS_TOKEN_KEY, accessToken);
+            await SecureStore.setItemAsync(
+                process.env.EXPO_PUBLIC_ACCESS_TOKEN_SECRET,
+                accessToken
+            );
             if (newRefreshToken) {
-                await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, newRefreshToken);
+                await SecureStore.setItemAsync(
+                    process.env.EXPO_PUBLIC_REFRESH_TOKEN_SECRET,
+                    newRefreshToken
+                );
             }
         } catch (error) {
             console.log("Error refreshing token:", error);
-            logout();  // Optionally log the user out if refreshing fails
+            logout(); // Optionally log the user out if refreshing fails
         }
     };
 
     const logout = async () => {
-        await SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY);
-        await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
+        await SecureStore.deleteItemAsync(process.env.EXPO_PUBLIC_ACCESS_TOKEN_SECRET);
+        await SecureStore.deleteItemAsync(process.env.EXPO_PUBLIC_REFRESH_TOKEN_SECRET);
         axios.defaults.headers.common["Authorization"] = "";
         setAuthState({
             accessToken: null,

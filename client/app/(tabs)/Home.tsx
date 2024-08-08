@@ -17,14 +17,14 @@ import { router} from "expo-router";
 const TAB_BAR_HEIGHT = 64;
 
 const Home = () => {
-    // const API_URL = "http://192.168.0.174:8000";
-    const API_URL = "http://192.168.29.57:8000";
+    // // const API_URL = "http://192.168.0.174:8000";
+    // const API_URL = "http://192.168.29.57:8000";
     const searchDoctors = useCallback(
         debounce(async (query) => {
-            console.log(`${API_URL}/doctor/search?query=${query}`);
+            console.log(`${process.env.EXPO_PUBLIC_API_URL}/doctor/search?query=${query}`);
             try {
                 const response = await axios.get(
-                    `${API_URL}/doctor/search?searchTerm=${query}`
+                    `${process.env.EXPO_PUBLIC_API_URL}/doctor/search?searchTerm=${query}`
                 );
                 console.log(response.data);
             } catch (error) {
@@ -45,13 +45,14 @@ const Home = () => {
                     flexGrow: 1,
                     justifyContent: "center",
                     paddingBottom: TAB_BAR_HEIGHT,
+                    paddingTop:20
                 }}
             >
                 {/* Header */}
                 <View className="bg-blue-600 p-10 rounded-b-3xl shadow-lg">
                     <View className="flex-row justify-between items-center">
                         <View>
-                            <Text className="text-white text-3xl font-poppins-light pt-4">
+                            <Text className="text-white text-3xl font-poppins-light">
                                 MediLink
                             </Text>
                             <Text className="text-blue-100 text-sm mt-1 font-poppins-light">

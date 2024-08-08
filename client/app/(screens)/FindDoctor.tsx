@@ -1,119 +1,155 @@
 import React, { useState, useEffect, useCallback } from "react";
 import {
-    View,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    FlatList,
-    SafeAreaView,
-    Image,
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  FlatList,
+  SafeAreaView,
+  Image,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
-import { debounce } from 'lodash';
+import { debounce } from "lodash";
 import { useNavigation } from "@react-navigation/native";
+import { FilterModal } from "../../components/FilterModal";
 
-const API_URL = "http://192.168.29.57:8000";
+const DoctorCard = ({ doctor, onPress }) => {
+  return (
+    <TouchableOpacity
+      className="bg-white p-3 rounded-lg mb-5 shadow-lg"
+      onPress={onPress}
+    >
+      <View className="flex-row items-center mb-3">
+        <Image
+          source={{
+            uri: `https://randomuser.me/api/portraits/${
+              doctor.doctorName.toLowerCase().includes("dr.") ? "men" : "women"
+            }/${Math.floor(Math.random() * 60) + 1}.jpg`,
+          }}
+          className="w-12 h-12 rounded-full"
+        />
+        <View className="ml-4 flex-1">
+          <Text className="font-bold text-[#1D4ED8] text-lg">
+            {doctor.doctorName}
+          </Text>
+          <Text className="text-gray-500 text-base">{doctor.specialization}</Text>
+          <Text className="text-gray-500 text-sm">{doctor.hospitalName}</Text>
+        </View>
+      </View>
+      <View className="flex-row justify-between items-center">
+        <View className="flex-row items-center">
+          <Ionicons name="location" size={16} color="#1D4ED8" />
+          <Text className="text-gray-500 text-sm ml-1">
+            {doctor.city}, {doctor.state}
+          </Text>
+        </View>
+        <Text className="text-[#1D4ED8] font-bold text-lg">
+          ₹{doctor.fees}
+        </Text>
+      </View>
+    </TouchableOpacity>
+  );
+};
 
 const FindDoctor = () => {
+  const navigation = useNavigation();
+  const [doctors, setDoctors] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showFilterModal, setShowFilterModal] = useState(false);
+  const [availableSpecialties, setAvailableSpecialties] = useState([]);
+  const [filters, setFilters] = useState({
+    rating: 0,
+    priceRange: [0, 1000],
+    distance: 50,
+    experience: 5,
+    sortBy: 'distance',
+    specializations: [],
+  });
 
-    const navigation = useNavigation();
-    const [doctors, setDoctors] = useState([]);
-    const [searchQuery, setSearchQuery] = useState("");
+  const fetchDoctors = async (query = "", filters = {}) => {
+    try {
+      const response = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/doctor/search`, {
+        params: {
+          searchTerm: query,
+          ...filters,
+        },
+      });
+      setDoctors(response.data);
+      setAvailableSpecialties(response.data.map((doctor) => doctor.specialization));
+    } catch (error) {
+      console.error("Error fetching doctors:", error);
+    }
+  };
 
-    const fetchDoctors = async (query = "") => {
-        try {
-            const response = await axios.get(
-                `${API_URL}/doctor/search?searchTerm=${query}`
-            );
-            setDoctors(response.data);
-        } catch (error) {
-            console.error("Error fetching doctors:", error);
-        }
-    };
+  const debouncedFetchDoctors = useCallback(
+    debounce((query, filters) => fetchDoctors(query, filters), 800),
+    [filters]
+  );
 
-    // Create a debounced version of fetchDoctors
-    const debouncedFetchDoctors = useCallback(
-        debounce((query) => fetchDoctors(query), 300),
-        []
-    );
+  useEffect(() => {
+    debouncedFetchDoctors(searchQuery, filters);
+  }, [debouncedFetchDoctors, searchQuery, filters]);
 
-    useEffect(() => {
-        fetchDoctors();
-    }, []);
+  const handleSearch = (text) => {
+    setSearchQuery(text);
+    debouncedFetchDoctors(text, filters);
+  };
 
-    const handleSearch = (text) => {
-        setSearchQuery(text);
-        debouncedFetchDoctors(text);
-    };
+  const handleApplyFilters = (newFilters) => {
+    setFilters(newFilters);
+  };
 
-    const renderDoctorItem = ({ item }) => (
-        <TouchableOpacity className="bg-white p-4 rounded-2xl shadow-md mb-4"
-        //@ts-ignore 
-        onPress={() => navigation.navigate('DoctorInfo', {doctor : item})} 
-        >
-            <View className="flex-row items-center mb-3">
-                <Image
-                    source={{
-                        uri: `https://randomuser.me/api/portraits/${
-                            item.doctorName.toLowerCase().includes("dr.")
-                                ? "men"
-                                : "women"
-                        }/${Math.floor(Math.random() * 60) + 1}.jpg`,
-                    }}
-                    className="w-16 h-16 rounded-full"
-                />
-                <View className="ml-4 flex-1">
-                    <Text className="font-poppins-bold text-blue-700 text-lg">
-                        {item.doctorName}
-                    </Text>
-                    <Text className="text-blue-600 font-poppins-regular">
-                        {item.specialization}
-                    </Text>
-                    <Text className="text-gray-600 font-poppins-regular">
-                        {item.hospitalName}
-                    </Text>
-                </View>
-            </View>
-            <View className="flex-row justify-between items-center">
-                <View className="flex-row items-center">
-                    <Ionicons name="location" size={16} color="#3B82F6" />
-                    <Text className="text-gray-600 ml-1 font-poppins-regular">
-                        {item.city}, {item.state}
-                    </Text>
-                </View>
-                <Text className="text-blue-700 font-poppins-semibold">
-                    ₹{item.fees}
-                </Text>
-            </View>
-        </TouchableOpacity>
-    );
+  const filteredDoctors = filters.specializations.length > 0
+    ? doctors.filter((doctor) => filters.specializations.includes(doctor.specialization))
+    : doctors;
 
-    return (
-        <SafeAreaView className="flex-1 bg-blue-50">
-            <View className="p-4">
-                <Text className="text-2xl font-poppins-bold text-blue-800 mb-4">
-                    Find Doctors
-                </Text>
-                <View className="bg-white rounded-full flex-row items-center p-4 shadow-md mb-4">
-                    <Ionicons name="search" size={24} color="#3B82F6" />
-                    <TextInput
-                        className="flex-1 ml-3 text-gray-700 text-base font-poppins-regular"
-                        placeholder="Search doctors, specialties..."
-                        value={searchQuery}
-                        onChangeText={handleSearch}
-                    />
-                </View>
-                <FlatList
-                    data={doctors}
-                    renderItem={renderDoctorItem}
-                    keyExtractor={(item) => item._id}
-                    showsVerticalScrollIndicator={false}
-                    contentContainerStyle={{ paddingBottom: 100 }}
-                />
-            </View>
-        </SafeAreaView>
-    );
+  return (
+    <SafeAreaView className="flex-1 bg-[#F9FAFB] p-3">
+      <View className="bg-white p-5 rounded-lg mb-5 mt-8 w-full">
+        <Text className="text-[#1D4ED8] text-2xl font-bold mb-4">
+          Find Doctors
+        </Text>
+        <View className="bg-[#F9FAFB] rounded-full flex-row items-center p-3 shadow-sm">
+          <Ionicons name="search" size={24} color="#1D4ED8" />
+          <TextInput
+            className="flex-1 text-gray-700 text-base mx-3"
+            placeholder="Search doctors, specialties..."
+            placeholderTextColor="#9CA3AF"
+            value={searchQuery}
+            onChangeText={handleSearch}
+          />
+          <TouchableOpacity
+            className="bg-[#1D4ED8] p-3 rounded-full"
+            onPress={() => setShowFilterModal(true)}
+          >
+            <Ionicons name="options" size={20} color="white" />
+          </TouchableOpacity>
+        </View>
+      </View>
+      <FlatList
+        data={filteredDoctors}
+        renderItem={({ item }) => (
+          <DoctorCard
+            doctor={item}
+            //@ts-ignore
+            onPress={() => navigation.navigate("DoctorInfo", { doctor: item })}
+          />
+        )}
+        keyExtractor={(item) => item._id}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 10 }} 
+      />
+      {showFilterModal && (
+        <FilterModal
+          filters={filters}
+          handleApplyFilters={handleApplyFilters}
+          setShowFilterModal={setShowFilterModal}
+          availableSpecialties={availableSpecialties}
+        />
+      )}
+    </SafeAreaView>
+  );
 };
 
 export default FindDoctor;

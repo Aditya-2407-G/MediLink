@@ -141,7 +141,7 @@ const SignIn = () => {
                                 <CustomButton
                                     title="Sign In"
                                     handlePress={handleSubmit}
-                                    containerStyles="w-full bg-blue-600 p-4 rounded-lg mt-6"
+                                    containerStyles="w-full bg-blue-700 p-4 rounded-lg mt-6"
                                     textStyles="text-white text-center font-bold text-xl font-poppins-semibold"
                                     isLoading={undefined}
                                 />

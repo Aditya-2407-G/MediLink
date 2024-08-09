@@ -229,7 +229,7 @@ const SignUp = () => {
                 >
                     <View className="bg-white rounded-3xl p-6 px-5 shadow-lg">
                         <View className="items-center">
-                            <Text className="text-blue-700 text-4xl mb-2 text-center -poppifontns-bold">
+                            <Text className="text-blue-700 text-4xl mb-2 text-center font-poppins-bold">
                                 Create Account
                             </Text>
                             <Text className="text-blue-600 text-xl mb-8 text-center font-poppins-regular">

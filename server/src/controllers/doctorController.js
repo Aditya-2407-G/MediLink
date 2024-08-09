@@ -13,8 +13,88 @@ export const tempDoctorData = async (req, res) => {
 };
 
 // Search function using regex and distance
+// export const findDoctor = async (req, res) => {
+//     try {
+//         const {
+//             searchTerm = "",
+//             distance,
+//             experience,
+//             sortBy = "fees",
+//             sortDirection = "desc",
+//             userLat,
+//             userLon,
+//             fees,
+//         } = req.query;
+
+//         // Build the regex query
+//         const query = {
+//             $or: [
+//                 { specialization: { $regex: new RegExp(searchTerm, "i") } },
+//                 { city: { $regex: new RegExp(searchTerm, "i") } },
+//                 { doctorName: { $regex: new RegExp(searchTerm, "i") } },
+//                 { hospitalName: { $regex: new RegExp(searchTerm, "i") } },
+//                 { hospitalAddress: { $regex: new RegExp(searchTerm, "i") } },
+//                 { state: { $regex: new RegExp(searchTerm, "i") } },
+//                 { country: { $regex: new RegExp(searchTerm, "i") } },
+//             ],
+//         };
+
+//         // Apply numerical filters
+//         const filters = {};
+
+//         // fees range filter
+//         if (fees) {
+//             filters.fees = { $lte: parseInt(fees) };
+//         }
+
+//         // Experience filter
+//         if (experience) {
+//             filters.experience = { $gte: parseInt(experience) };
+//         }
+
+//         // Combine filters with the search query
+//         const finalQuery =
+//             Object.keys(filters).length > 0
+//                 ? { $and: [query, filters] }
+//                 : query;
+
+//         // Distance filter
+//         if (userLat && userLon && distance) {
+//             finalQuery.location = {
+//                 $geoWithin: {
+//                     $centerSphere: [
+//                         [parseFloat(userLon), parseFloat(userLat)], // [longitude, latitude]
+//                         parseFloat(distance) / 6371, // Distance in radians (3963.2 is Earth's radius in miles)
+//                     ],
+//                 },
+//             };
+//         }
+
+//         // Sorting
+//         const sortOptions = {};
+//         if (sortBy) {
+//             sortOptions[sortBy] = sortDirection === "desc" ? -1 : 1;
+//         }
+
+//         // Execute the query
+//         const doctors = await Doctor.find(finalQuery)
+//             .select("-vector")
+//             .sort(sortOptions)
+//             .exec();
+
+//         // console.log(doctors);
+
+//         res.status(200).json(doctors);
+//     } catch (error) {
+//         console.error("Error fetching doctors:", error);
+//         res.status(500).json({
+//             error: "An error occurred while searching for doctors.",
+//         });
+//     }
+// };
+
+
 export const findDoctor = async (req, res) => {
-    console.log("INSIDE SERVER FUNCTION", req.query);
     try {
         const {
             searchTerm = "",
@@ -27,7 +107,6 @@ export const findDoctor = async (req, res) => {
             fees,
         } = req.query;
 
-        // Build the regex query
         const query = {
             $or: [
                 { specialization: { $regex: new RegExp(searchTerm, "i") } },
@@ -40,51 +119,41 @@ export const findDoctor = async (req, res) => {
             ],
         };
 
-        // Apply numerical filters
         const filters = {};
+        if (fees) filters.fees = { $lte: parseInt(fees) };
+        if (experience) filters.experience = { $gte: parseInt(experience) };
 
-        // fees range filter
-        if (fees) {
-            filters.fees = { $lte: parseInt(fees) };
-        }
+        let finalQuery = Object.keys(filters).length > 0 ? { $and: [query, filters] } : query;
 
-        // Experience filter
-        if (experience) {
-            filters.experience = { $gte: parseInt(experience) };
-        }
-
-        // Combine filters with the search query
-        const finalQuery =
-            Object.keys(filters).length > 0
-                ? { $and: [query, filters] }
-                : query;
-
-        // Distance filter
-        if (userLat && userLon && distance) {
-            finalQuery.location = {
-                $geoWithin: {
-                    $centerSphere: [
-                        [parseFloat(userLon), parseFloat(userLat)], // [longitude, latitude]
-                        parseFloat(distance) / 6371, // Distance in radians (3963.2 is Earth's radius in miles)
-                    ],
-                },
-            };
-        }
-
-        // Sorting
         const sortOptions = {};
-        if (sortBy) {
+        if (sortBy && sortBy !== "distance") {
             sortOptions[sortBy] = sortDirection === "desc" ? -1 : 1;
         }
 
-        // Execute the query
-        const doctors = await Doctor.find(finalQuery)
-            .select("-vector")
-            .sort(sortOptions)
-            .exec();
-
-        console.log(finalQuery, sortOptions);
-        // console.log(doctors);
+        let doctors;
+        if (userLat && userLon) {
+            doctors = await Doctor.aggregate([
+                {
+                    $geoNear: {
+                        near: { type: "Point", coordinates: [parseFloat(userLon), parseFloat(userLat)] },
+                        distanceField: "distance",
+                        maxDistance: distance ? parseFloat(distance) * 1000 : 50000, // Convert to meters
+                        query: finalQuery,
+                        spherical: true,
+                    },
+                },
+                {
+                    $sort: sortBy === "distance" 
+                        ? { distance: sortDirection === "desc" ? -1 : 1 }
+                        : Object.keys(sortOptions).length > 0 ? sortOptions : { _id: 1 },
+                },
+            ]).exec();
+        } else {
+            doctors = await Doctor.find(finalQuery)
+                .select("-vector")
+                .sort(Object.keys(sortOptions).length > 0 ? sortOptions : { _id: 1 })
+                .exec();
+        }
 
         res.status(200).json(doctors);
     } catch (error) {
@@ -94,3 +163,4 @@ export const findDoctor = async (req, res) => {
         });
     }
 };
+

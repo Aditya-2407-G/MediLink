@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "MediLink",
-    "slug": "MediLink",
+    "slug": "medilink",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -20,7 +20,11 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.aditya2407.MediLink"
+      "package": "com.aditya2407.MediLink",
+      "permissions": [
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -43,6 +47,15 @@
     "cli": {
       "version": ">= 2.4.0",
       "requireCommit": true
-    }
+    },
+    "extra": {
+      "router": {
+        "origin": false 
+      },
+      "eas": {
+        "projectId": "e4bb9f3b-6008-404a-9f27-6f51f98e7674"
+      }
+    },
+    "owner": "aditya2407"
   }
 }

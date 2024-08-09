@@ -1,11 +1,50 @@
-import React from "react";
-import { View, Text, Image, ScrollView, SafeAreaView } from "react-native";
+import React, { useState, useEffect, } from "react";
+import { View, Text, Image, ScrollView, SafeAreaView, TouchableOpacity, Linking, BackHandler } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRoute } from "@react-navigation/native";
+import * as Location from 'expo-location';
 
 const DoctorInfo = () => {
     const route = useRoute();
-    const { doctor }: any = route.params;
+    let { doctor }: any = route.params;
+    doctor=JSON.parse(doctor);
+    const [location, setLocation] = useState(null);
+
+    const GetLocation = async () => {
+        try {
+            // Check if location permission is granted
+            const { status } = await Location.getForegroundPermissionsAsync();
+            if (status !== "granted") {
+                const { status } = await Location.requestForegroundPermissionsAsync();
+                if (status !== "granted") {
+                    console.log("Permission not granted");
+                    return;
+                }
+            }
+
+            const currentLocation = await Location.getCurrentPositionAsync({});
+            setLocation(currentLocation);
+        } catch (error) {
+            console.error("Error getting location:", error);
+        }
+    };
+
+    useEffect(() => {
+        GetLocation();
+    }, []);
+
+    const openMapsWithDirections = () => {
+        if (location) {
+            const userLat = location["coords"]["latitude"];
+            const userLon = location["coords"]["longitude"];
+            const doctorLat = doctor.location.coordinates[1];
+            const doctorLon = doctor.location.coordinates[0];
+            const url = `https://www.google.com/maps/dir/?api=1&origin=${userLat},${userLon}&destination=${doctorLat},${doctorLon}`;
+            Linking.openURL(url);
+        } else {
+            console.log('User location not available');
+        }
+    };
 
     return (
         <SafeAreaView className="flex-1 bg-blue-50">
@@ -31,12 +70,13 @@ const DoctorInfo = () => {
                         {doctor.experience} Years
                     </Text>
                 </View>
+
                 <View className="bg-white p-4 rounded-2xl shadow-md mb-4">
                     <Text className="font-poppins-bold text-blue-700 text-lg mb-2">
                         Hospital
                     </Text>
                     <Text className="text-gray-600 font-poppins-regular">
-                        {doctor.hospitalName}
+                        {doctor.hospitalName},
                     </Text>
                 </View>
 
@@ -53,6 +93,14 @@ const DoctorInfo = () => {
                             {doctor.country}
                         </Text>
                     </View>
+                    <TouchableOpacity 
+                        onPress={openMapsWithDirections}
+                        className="bg-blue-500 p-2 rounded-lg mt-2"
+                    >
+                        <Text className="text-white text-center font-poppins-semibold">
+                            Get Directions
+                        </Text>
+                    </TouchableOpacity>
                 </View>
 
                 <View className="bg-white p-4 rounded-2xl shadow-md mb-4">

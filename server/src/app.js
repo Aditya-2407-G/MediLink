@@ -4,6 +4,7 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import authRoutes from './routes/auth.js';
 import doctorRoutes from "./routes/doctor.js"
+import appointmentRoutes from "./routes/appointment.js"
 
 
 
@@ -23,6 +24,7 @@ app.use(bodyParser.json());
 
 app.use('/auth', authRoutes);
 app.use('/doctor', doctorRoutes);
+app.use('/appointment', appointmentRoutes);
 
 
 

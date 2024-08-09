@@ -58,49 +58,91 @@ export const DoctorCard = ({ doctor, onPress }) => {
         : require("../assets/images/avatar6.png");
 
     return (
+        // <TouchableOpacity className="bg-white p-4 py-2 rounded-xl mb-4 shadow-lg" onPress={onPress}>
+        //     <View className="flex-row items-center mb-4">
+        //         <Image
+        //             source={profileImageSource}
+        //             className="w-16 h-16 rounded-full"
+        //         />
+        //         <View className="ml-4 flex-1">
+        //             <Text className="text-blue-600 text-lg font-poppins-semibold">
+        //                 {doctor.doctorName}
+        //             </Text>
+        //             <Text className="text-gray-500 text-base font-poppins-regular">
+        //                 {doctor.specialization}
+        //             </Text>
+        //             <Text className="text-gray-500 text-sm font-poppins-regular">
+        //                 {doctor.hospitalName}
+        //             </Text>
+        //             <Text className="text-gray-500 text-sm font-poppins-regular">
+        //                 Experience: {doctor.experience} Years
+        //             </Text>
+        //         </View>
+        //     </View>
+        //     <View className="flex-row justify-between items-center">
+        //         {/* <View className="flex-row items-center">
+        //             <Ionicons name="location" size={16} color="#2563eb" />
+        //             <Text className="text-gray-500 text-sm ml-1 font-poppins-regular">
+        //                 {doctor.city}, {doctor.state}
+        //             </Text>
+        //         </View> */}
+        //         <Text className="text-blue-600 text-lg font-poppins-semibold">
+        //             ₹{doctor.fees}
+        //         </Text>
+        //         <Text className="font-poppins-regular text-neutral-700 text-base">
+        //             {calculateDistance(
+        //                 userLat,
+        //                 userLon,
+        //                 doctor.location.coordinates[1],
+        //                 doctor.location.coordinates[0]
+        //             )}{" "}
+        //             km
+        //         </Text>
+        //     </View>
+        // </TouchableOpacity>
         <TouchableOpacity
             className="bg-white p-4 rounded-xl mb-4 shadow-lg"
             onPress={onPress}
         >
-            <View className="flex-row items-center mb-4">
+            <View className="flex-row items-center">
                 <Image
                     source={profileImageSource}
-                    className="w-12 h-12 rounded-full"
+                    className="w-16 h-16 rounded-full"
                 />
                 <View className="ml-4 flex-1">
-                    <Text className="font-bold text-blue-700 text-lg">
+                    <Text className="text-blue-600 text-lg font-poppins-semibold">
                         {doctor.doctorName}
                     </Text>
-                    <Text className="text-gray-500 text-base">
+                    <Text className="text-gray-500 text-base font-poppins-regular">
                         {doctor.specialization}
                     </Text>
-                    <Text className="text-gray-500 text-sm">
+                    <Text className="text-gray-500 text-sm font-poppins-regular">
                         {doctor.hospitalName}
                     </Text>
-                    <Text className="text-gray-500 text-sm">
-                        Experience: {doctor.experience} Years
+                    <Text className="text-gray-500 text-sm font-poppins-regular">
+                        {doctor.experience} years of experience
                     </Text>
                 </View>
             </View>
-            <View className="flex-row justify-between items-center">
-                <View className="flex-row items-center">
-                    <Ionicons name="location" size={16} color="#1D4ED8" />
-                    <Text className="text-gray-500 text-sm ml-1">
-                        {doctor.city}, {doctor.state}
-                    </Text>
-                </View>
-                <Text className="text-blue-700 font-bold text-lg">
+
+            <View className="flex-row justify-between items-center mt-4">
+                <Text className="text-blue-600 text-lg font-poppins-semibold">
                     ₹{doctor.fees}
                 </Text>
-                <Text>
-                    {calculateDistance(
-                        userLat,
-                        userLon,
-                        doctor.location.coordinates[1],
-                        doctor.location.coordinates[0]
-                    )}{" "}
-                    km
-                </Text>
+
+                <View className="flex-row items-center">
+                    <Ionicons name="location" size={16} color="#3B82F6" />
+
+                    <Text className="text-blue-600 font-poppins-semibold ">
+                        {calculateDistance(
+                            userLat,
+                            userLon,
+                            doctor.location.coordinates[1],
+                            doctor.location.coordinates[0]
+                        )}{" "}
+                        km
+                    </Text>
+                </View>
             </View>
         </TouchableOpacity>
     );

@@ -23,6 +23,23 @@ const TabLayout = () => {
                 }}
             >
                 <Tabs.Screen
+                    name="Appointments"
+                    options={{
+                        title: "Appointments",
+                        headerShown: false,
+                        tabBarIcon: ({ color, focused }) => (
+                            <TabIcon
+                                icon={icons.calendar}
+                                color={color}
+                                name="Appointments"
+                                focused={focused}
+                                containerStyle="w-6 h-6"
+                                iconStyle="gap-2"
+                            />
+                        ),
+                    }}
+                />
+                <Tabs.Screen
                     name="Home"
                     options={{
                         title: "Home",
@@ -32,6 +49,23 @@ const TabLayout = () => {
                                 icon={icons.home}
                                 color={color}
                                 name="Home"
+                                focused={focused}
+                                containerStyle="w-6 h-6"
+                                iconStyle="gap-2"
+                            />
+                        ),
+                    }}
+                />
+                <Tabs.Screen
+                    name="Profile"
+                    options={{
+                        title: "Profile",
+                        headerShown: false,
+                        tabBarIcon: ({ color, focused }) => (
+                            <TabIcon
+                                icon={icons.Profile}
+                                color={color}
+                                name="Profile"
                                 focused={focused}
                                 containerStyle="w-6 h-6"
                                 iconStyle="gap-2"

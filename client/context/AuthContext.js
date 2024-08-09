@@ -59,6 +59,7 @@ const AuthProvider = ({ children }) => {
     const register = async (user) => {
         try {
             console.log("USER BEING SENT IS: ", user);
+            console.log(`${process.env.EXPO_PUBLIC_API_URL}/auth/register`)
             const response = await axios.post(
                 `${process.env.EXPO_PUBLIC_API_URL}/auth/register`,
                 {

@@ -1,215 +1,206 @@
-import React, { useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import { useNavigation } from "@react-navigation/native";
 import {
     View,
     Text,
     TextInput,
     TouchableOpacity,
-    ScrollView,
+    FlatList,
     SafeAreaView,
-    Image,
-    Platform,
+    ScrollView,
+    RefreshControl,
 } from "react-native";
-import { Ionicons, FontAwesome5 } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
 import { debounce } from "lodash";
-import { router} from "expo-router";
+import { router } from "expo-router";
+import { FilterModal } from "../../components/FilterModal";
+import { DoctorCard } from "@/components/DoctorCard";
+import * as Location from "expo-location";
 
 const TAB_BAR_HEIGHT = 64;
 
 const Home = () => {
-    // // const API_URL = "http://192.168.0.174:8000";
-    // const API_URL = "http://192.168.29.57:8000";
-    const searchDoctors = useCallback(
-        debounce(async (query) => {
-            console.log(`${process.env.EXPO_PUBLIC_API_URL}/doctor/search?query=${query}`);
+    const navigation = useNavigation();
+    const [doctors, setDoctors] = useState([]);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [showFilterModal, setShowFilterModal] = useState(false);
+    const [filters, setFilters] = useState({});
+    const [isFilterApplied, setIsFilterApplied] = useState(false);
+    const [refreshing, setRefreshing] = useState(false);
+
+    // Get user's current location and fetch initial data
+    const getLocationAndFetchData = async () => {
+        try {
+            // Check if location permission is granted
+            const { status } = await Location.getForegroundPermissionsAsync();
+            if (status !== "granted") {
+                const { status } = await Location.requestForegroundPermissionsAsync();
+                if (status !== "granted") {
+                    console.log("Permission not granted");
+                    return;
+                }
+            }
+            // Get the current location
+            const { coords } = await Location.getCurrentPositionAsync({});
+            const { latitude, longitude } = coords;
+
+            // Set location in filters
+            const updatedFilters = {
+                ...filters,
+                userLat: latitude,
+                userLon: longitude,
+            };
+            setFilters(updatedFilters);
+
+            // Fetch initial data based on location
+            const response = await axios.get(
+                `http://192.168.0.174:8000/doctor/search`, // Use your appropriate endpoint
+                {
+                    params: {
+                        ...updatedFilters,
+                        sortBy: "distance", // Sort by distance from the user's location
+                        sortDirection: "asc", // Closest to farthest
+                    },
+                }
+            );
+            setDoctors(response.data);
+        } catch (error) {
+            console.error("Error fetching doctors based on location:", error);
+        }
+    };
+
+    useEffect(() => {
+        getLocationAndFetchData(); // Call this only on initial render
+    }, []); // Empty dependency array ensures this only runs on initial render
+
+    // Debounced fetch doctors for search and filter updates
+    const debouncedFetchDoctors = useCallback(
+        debounce(async (query, currentFilters) => {
+            if (showFilterModal) return;
             try {
                 const response = await axios.get(
-                    `${process.env.EXPO_PUBLIC_API_URL}/doctor/search?searchTerm=${query}`
+                    `http://192.168.0.174:8000/doctor/search`,
+                    {
+                        params: {
+                            searchTerm: query,
+                            ...currentFilters,
+                        },
+                    }
                 );
-                console.log(response.data);
+                setDoctors(response.data);
             } catch (error) {
-                console.error("Error searching for doctors:", error);
+                console.error("Error fetching doctors:", error);
             }
-        }, 300),
+        }, 800),
         []
     );
 
-    const handleSearchChange = (text) => {
-        searchDoctors(text);
+    useEffect(() => {
+        if (searchQuery || isFilterApplied) {
+            debouncedFetchDoctors(searchQuery, filters);
+            setIsFilterApplied(false);
+        }
+    }, [searchQuery, filters, isFilterApplied, debouncedFetchDoctors]);
+
+    const handleSearch = (text) => {
+        setSearchQuery(text);
     };
 
-    return (
-        <SafeAreaView className="flex-1 bg-blue-50">
-            <ScrollView
-                contentContainerStyle={{
-                    flexGrow: 1,
-                    justifyContent: "center",
-                    paddingBottom: TAB_BAR_HEIGHT,
-                    paddingTop:20
-                }}
-            >
-                {/* Header */}
-                <View className="bg-blue-600 p-10 rounded-b-3xl shadow-lg">
-                    <View className="flex-row justify-between items-center">
-                        <View>
-                            <Text className="text-white text-3xl font-poppins-light">
-                                MediLink
-                            </Text>
-                            <Text className="text-blue-100 text-sm mt-1 font-poppins-light">
-                                Your Health, Our Priority
-                            </Text>
-                        </View>
-                        <TouchableOpacity className="bg-blue-500 p-2 rounded-full">
-                            <Ionicons
-                                name="notifications"
-                                size={24}
-                                color="white"
-                            />
-                        </TouchableOpacity>
-                    </View>
-                </View>
+    const handleApplyFilters = (newFilters) => {
+        setFilters((prevFilters) => ({
+            ...prevFilters,
+            ...newFilters,
+        }));
+        debouncedFetchDoctors(searchQuery, { ...filters, ...newFilters });
+    };
 
-                {/* Search Bar */}
-                <View className="bg-white mx-4 -mt-6 rounded-full flex-row items-center p-4 shadow-lg">
-                    <Ionicons name="search" size={24} color="#3B82F6" />
-                    <TextInput
-                        onChangeText={handleSearchChange}
-                        className="flex-1 ml-3 text-gray-700 text-base font-poppins-regular"
-                        placeholder="Search doctors, specialties..."
-                    />
+    const onRefresh = useCallback(() => {
+        setRefreshing(true);
+        getLocationAndFetchData().then(() => setRefreshing(false));
+    }, []);
+
+    return (
+        <SafeAreaView className="flex-1 bg-blue-50 pt-6">
+            {/* Header */}
+            <View className="bg-blue-600 p-10 rounded-b-3xl shadow-lg">
+                <View className="flex-row justify-between items-center">
+                    <View>
+                        <Text className="text-white text-3xl font-poppins-light">
+                            MediLink
+                        </Text>
+                        <Text className="text-blue-100 text-sm mt-1 font-poppins-light">
+                            Your Health, Our Priority
+                        </Text>
+                    </View>
                     <TouchableOpacity className="bg-blue-500 p-2 rounded-full">
-                        <Ionicons name="options" size={20} color="white" />
+                        <Ionicons
+                            name="notifications"
+                            size={24}
+                            color="white"
+                        />
                     </TouchableOpacity>
                 </View>
+            </View>
 
-                {/* Quick Actions */}
-                <View className="flex-row justify-around mx-4 my-6">
-                    {[
-                        {
-                            icon: "user-md",
-                            title: "Find Doctors",
-                            screen: "FindDoctor",
-                        },
-                        { icon: "calendar-check", title: "Appointments" },
-                        { icon: "comments", title: "Consult Now" },
-                        { icon: "file-medical-alt", title: "Health Records" },
-                    ].map((item, index) => (
-                        <TouchableOpacity
-                            key={index}
-                            className="items-center"
+            {/* Search Bar */}
+            <View className="bg-white mx-4 -mt-6 rounded-full flex-row items-center p-4 shadow-lg">
+                <Ionicons name="search" size={24} color="#3B82F6" />
+                <TextInput
+                    className="flex-1 text-gray-700 text-base mx-3 font-poppins-regular"
+                    placeholder="Search doctors, specialties..."
+                    placeholderTextColor="#9CA3AF"
+                    value={searchQuery}
+                    onChangeText={handleSearch}
+                />
+                <TouchableOpacity
+                    className="bg-blue-500 p-2 rounded-full"
+                    onPress={() => setShowFilterModal(true)}
+                >
+                    <Ionicons name="options" size={20} color="white" />
+                </TouchableOpacity>
+            </View>
+
+            {/* Doctors List */}
+            <View className="mx-4 my-6">
+                <Text className="text-xl font-poppins-bold text-blue-800 mb-4">
+                    Available Doctors
+                </Text>
+
+                <FlatList
+                    data={doctors}
+                    renderItem={({ item }) => (
+                        <DoctorCard
+                            doctor={item}
                             onPress={() =>
-                                item.screen
-                                // @ts-ignore
-                                ? router.push(item.screen)
-                                    : null
+                                router.push({
+                                    pathname: "/DoctorInfo",
+                                    params: {
+                                        doctor: JSON.stringify(item),
+                                    },
+                                })
                             }
-                        >
-                            <View className="bg-blue-100 p-4 rounded-2xl shadow-md">
-                                <FontAwesome5
-                                    name={item.icon}
-                                    size={24}
-                                    color="#3B82F6"
-                                />
-                            </View>
-                            <Text className="mt-2 text-blue-700 font-poppins-medium text-xs">
-                                {item.title}
-                            </Text>
-                        </TouchableOpacity>
-                    ))}
-                </View>
+                        />
+                    )}
+                    keyExtractor={(item) => item._id}
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={{ paddingBottom: 10 }}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={onRefresh}
+                        />
+                    }
+                />
+            </View>
 
-                {/* Nearby Doctors */}
-                <View className="mx-4 my-6">
-                    <Text className="text-xl font-poppins-bold text-blue-800 mb-4">
-                        Nearby Doctors
-                    </Text>
-                    <ScrollView
-                        horizontal
-                        showsHorizontalScrollIndicator={false}
-                    >
-                        {[1, 2, 3].map((item) => (
-                            <TouchableOpacity
-                                key={item}
-                                className="bg-white p-4 rounded-2xl shadow-md mr-4 w-64"
-                            >
-                                <View className="flex-row items-center mb-3">
-                                    <Image
-                                        source={{
-                                            uri: `https://randomuser.me/api/portraits/women/${
-                                                30 + item
-                                            }.jpg`,
-                                        }}
-                                        className="w-12 h-12 rounded-full"
-                                    />
-                                    <View className="ml-3">
-                                        <Text className="font-poppins-bold text-blue-700">
-                                            Dr. Sarah Johnson
-                                        </Text>
-                                        <Text className="text-blue-600 text-sm font-poppins-regular">
-                                            Pediatrician
-                                        </Text>
-                                    </View>
-                                </View>
-                                <View className="flex-row items-center justify-between">
-                                    <View className="flex-row items-center">
-                                        <Ionicons
-                                            name="location"
-                                            size={16}
-                                            color="#3B82F6"
-                                        />
-                                        <Text className="text-gray-600 ml-1 font-poppins-regular">
-                                            0.8 miles
-                                        </Text>
-                                    </View>
-                                    <TouchableOpacity className="bg-blue-100 py-1 px-3 rounded-full">
-                                        <Text className="text-blue-700 font-poppins-semibold">
-                                            Details
-                                        </Text>
-                                    </TouchableOpacity>
-                                </View>
-                            </TouchableOpacity>
-                        ))}
-                    </ScrollView>
-                </View>
-
-                {/* Popular Specialties */}
-                <View className="mx-4 my-6">
-                    <Text className="text-xl font-poppins-bold text-blue-800 mb-4">
-                        Popular Specialties
-                    </Text>
-                    <View className="flex-row flex-wrap justify-between">
-                        {[
-                            "Dentist",
-                            "Pediatrician",
-                            "Dermatologist",
-                            "Orthopedic",
-                        ].map((specialty, index) => (
-                            <TouchableOpacity
-                                key={specialty}
-                                className="bg-white p-4 rounded-2xl shadow-md mb-4 w-[48%] items-center"
-                            >
-                                <View className="bg-blue-100 p-3 rounded-full mb-2">
-                                    <FontAwesome5
-                                        name={
-                                            [
-                                                "tooth",
-                                                "baby",
-                                                "allergies",
-                                                "bone",
-                                            ][index]
-                                        }
-                                        size={24}
-                                        color="#3B82F6"
-                                    />
-                                </View>
-                                <Text className="text-blue-700 font-poppins-semibold text-center">
-                                    {specialty}
-                                </Text>
-                            </TouchableOpacity>
-                        ))}
-                    </View>
-                </View>
-            </ScrollView>
+            {showFilterModal && (
+                <FilterModal
+                    filters={filters}
+                    handleApplyFilters={handleApplyFilters}
+                    setShowFilterModal={setShowFilterModal}
+                />
+            )}
         </SafeAreaView>
     );
 };

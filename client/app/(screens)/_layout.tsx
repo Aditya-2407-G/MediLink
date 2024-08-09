@@ -20,6 +20,12 @@ const ScreenLayout = () => {
                         headerShown: false,
                     }}
                 />
+                <Stack.Screen
+                    name="Notification"
+                    options={{
+                        headerShown: false,
+                    }}
+                />
             </Stack>
         </>
     );

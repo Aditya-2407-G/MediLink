@@ -47,8 +47,8 @@ export default function Index() {
                         isLoading={undefined}
                     />
                     <CustomButton
-                        title="Location"
-                        handlePress={() => router.push("/GetLocation")}
+                        title="Notifications"
+                        handlePress={() => router.push("/Notification")}
                         containerStyles="bg-green-600 w-1/3"
                         textStyles="text-xl text-white"
                         isLoading={undefined}

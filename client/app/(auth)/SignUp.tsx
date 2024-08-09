@@ -277,7 +277,7 @@ const SignUp = () => {
                                         </Text>
                                         <TextInput
                                             className="border border-blue-300 rounded-lg p-4 bg-blue-50 text-lg font-poppins-regular"
-                                            placeholder="John Doe"
+                                            placeholder="Ram Kumar"
                                             onChangeText={handleChange("name")}
                                             onBlur={handleBlur("name")}
                                             value={values.name}
@@ -294,7 +294,7 @@ const SignUp = () => {
                                         </Text>
                                         <TextInput
                                             className="border border-blue-300 rounded-lg p-4 bg-blue-50 text-lg font-poppins-regular"
-                                            placeholder="johndoe@example.com"
+                                            placeholder="ramkumar@gmail.com."
                                             onChangeText={handleChange("email")}
                                             onBlur={handleBlur("email")}
                                             value={values.email}
@@ -457,7 +457,7 @@ const SignUp = () => {
                                                 </Text>
                                                 <TextInput
                                                     className="border border-blue-300 rounded-lg p-4 bg-blue-50 text-lg font-poppins-regular"
-                                                    placeholder="..."
+                                                    placeholder="6"
                                                     onChangeText={handleChange(
                                                         "experience"
                                                     )}
@@ -479,7 +479,7 @@ const SignUp = () => {
                                                 </Text>
                                                 <TextInput
                                                     className="border border-blue-300 rounded-lg p-4 bg-blue-50 text-lg font-poppins-regular"
-                                                    placeholder="ABC Hospital"
+                                                    placeholder="AIIMS Hospital"
                                                     onChangeText={handleChange(
                                                         "hospitalName"
                                                     )}
@@ -503,7 +503,7 @@ const SignUp = () => {
                                                 </Text>
                                                 <TextInput
                                                     className="border border-blue-300 rounded-lg p-4 bg-blue-50 text-lg font-poppins-regular"
-                                                    placeholder="123 Street, City"
+                                                    placeholder="Aurobindo Marg"
                                                     onChangeText={handleChange(
                                                         "hospitalAddress"
                                                     )}

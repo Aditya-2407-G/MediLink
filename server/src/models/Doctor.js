@@ -99,7 +99,7 @@ const doctorSchema = Schema(
             type: String,
             required: true,
             default: () =>
-                `https://randomuser.me/api/portraits/${Math.floor(
+                `https://randomuser.me/api/portraits/men/${Math.floor(
                     Math.random() * 100
                 )}.jpg`,
         },

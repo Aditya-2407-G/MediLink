@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { useNavigation } from "@react-navigation/native";
 import {
     View,
     Text,
@@ -7,7 +6,6 @@ import {
     TouchableOpacity,
     FlatList,
     SafeAreaView,
-    ScrollView,
     RefreshControl,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -18,10 +16,9 @@ import { FilterModal } from "../../components/FilterModal";
 import { DoctorCard } from "@/components/DoctorCard";
 import * as Location from "expo-location";
 
-const TAB_BAR_HEIGHT = 64;
 
 const Home = () => {
-    const navigation = useNavigation();
+    
     const [doctors, setDoctors] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [showFilterModal, setShowFilterModal] = useState(false);
@@ -35,7 +32,8 @@ const Home = () => {
             // Check if location permission is granted
             const { status } = await Location.getForegroundPermissionsAsync();
             if (status !== "granted") {
-                const { status } = await Location.requestForegroundPermissionsAsync();
+                const { status } =
+                    await Location.requestForegroundPermissionsAsync();
                 if (status !== "granted") {
                     console.log("Permission not granted");
                     return;
@@ -121,24 +119,20 @@ const Home = () => {
     }, []);
 
     return (
-        <SafeAreaView className="flex-1 bg-blue-50 pt-6">
+        <SafeAreaView className="flex-1 bg-blue-50 pt-5">
             {/* Header */}
             <View className="bg-blue-600 p-10 rounded-b-3xl shadow-lg">
                 <View className="flex-row justify-between items-center">
                     <View>
-                        <Text className="text-white text-3xl font-poppins-light">
+                        <Text className="text-white text-3xl font-poppins-medium">
                             MediLink
                         </Text>
-                        <Text className="text-blue-100 text-sm mt-1 font-poppins-light">
+                        <Text className="text-blue-100 text-base mt-1 font-poppins-light">
                             Your Health, Our Priority
                         </Text>
                     </View>
                     <TouchableOpacity className="bg-blue-500 p-2 rounded-full">
-                        <Ionicons
-                            name="notifications"
-                            size={24}
-                            color="white"
-                        />
+                        <Ionicons name="log-out" size={24} color="white" />
                     </TouchableOpacity>
                 </View>
             </View>
@@ -162,11 +156,10 @@ const Home = () => {
             </View>
 
             {/* Doctors List */}
-            <View className="mx-4 my-6">
+            <View className="mx-4 my-4">
                 <Text className="text-xl font-poppins-bold text-blue-800 mb-4">
                     Available Doctors
                 </Text>
-
                 <FlatList
                     data={doctors}
                     renderItem={({ item }) => (
@@ -184,7 +177,7 @@ const Home = () => {
                     )}
                     keyExtractor={(item) => item._id}
                     showsVerticalScrollIndicator={false}
-                    contentContainerStyle={{ paddingBottom: 10 }}
+                    contentContainerStyle={{ paddingBottom: 100 }}
                     refreshControl={
                         <RefreshControl
                             refreshing={refreshing}

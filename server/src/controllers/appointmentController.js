@@ -1,12 +1,12 @@
-import { Appointment } from "../models/Appointment.js";// Replace with your actual model path
+import { Appointment } from "../models/Appointment.js"; // Replace with your actual model path
 
 export const book = async (req, res) => {
-    const { doctorId, appointmentDate, timeSlot } = req.body;
+    const { doctor_id, appointmentDate, timeSlot } = req.body;
 
     try {
         // Check if the requested time slot is already booked
         const existingAppointment = await Appointment.findOne({
-            doctorId: doctorId,
+            doctor_id: doctor_id,
             appointmentDate: appointmentDate,
             timeSlot: timeSlot,
         });
@@ -22,10 +22,10 @@ export const book = async (req, res) => {
 
         // If no overlapping appointment, create a new appointment
         const newAppointment = new Appointment({
-            doctorId: doctorId,
+            doctor_id: doctor_id,
             appointmentDate: appointmentDate,
             timeSlot: timeSlot,
-            userId: req.user.id, // Assuming you're using authentication and req.user contains the logged-in user's ID
+            user_id: req.user.userId,
         });
 
         await newAppointment.save();
@@ -43,5 +43,63 @@ export const book = async (req, res) => {
             message:
                 "An error occurred while booking the appointment. Please try again later.",
         });
+    }
+};
+
+export const checkAvailability = async (req, res) => {
+    try {
+        const { doctor_id, date } = req.query;
+
+        // Find all appointments that match the doctor_id and appointmentDate
+        const appointments = await Appointment.find(
+            { doctor_id: doctor_id, appointmentDate: date },
+            { timeSlot: 1, _id: 0 }
+        );
+
+        // Return the matched appointments
+        res.status(200).json(appointments);
+    } catch (error) {
+        console.error("Error fetching appointments:", error);
+        res.status(500).json({
+            message: "Server error. Could not check availability.",
+        });
+    }
+};
+
+export const upcoming = async (req, res) => {
+    try {
+        const appointments = await Appointment.find({
+            user_id: req.user.userId,
+        })
+            .populate({
+                path: "doctor_id",
+                select: "-vector", 
+            })
+            .sort({ appointmentDate: 1, timeSlot: 1 })
+            .exec();
+        res.status(200).json(appointments);
+    } catch (err) {
+        res.status(500).json(err);
+    }
+};
+
+export const cancel = async (req, res) => {
+    try {
+        console.log(req.query)
+        const appointmentId = req.query.appointmentId; 
+        // Extract ID from query parameters
+        if (!appointmentId) {
+            return res.status(400).json({ message: "Appointment ID is required." });
+        }
+
+        const result = await Appointment.deleteOne({ _id: appointmentId });
+
+        if (result.deletedCount === 0) {
+            return res.status(404).json({ message: "Appointment not found." });
+        }
+
+        res.status(200).json({ message: "Appointment cancelled successfully." });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
     }
 };

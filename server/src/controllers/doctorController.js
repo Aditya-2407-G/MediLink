@@ -93,7 +93,6 @@ export const tempDoctorData = async (req, res) => {
 //     }
 // };
 
-
 export const findDoctor = async (req, res) => {
     try {
         const {
@@ -123,7 +122,10 @@ export const findDoctor = async (req, res) => {
         if (fees) filters.fees = { $lte: parseInt(fees) };
         if (experience) filters.experience = { $gte: parseInt(experience) };
 
-        let finalQuery = Object.keys(filters).length > 0 ? { $and: [query, filters] } : query;
+        let finalQuery =
+            Object.keys(filters).length > 0
+                ? { $and: [query, filters] }
+                : query;
 
         const sortOptions = {};
         if (sortBy && sortBy !== "distance") {
@@ -135,23 +137,50 @@ export const findDoctor = async (req, res) => {
             doctors = await Doctor.aggregate([
                 {
                     $geoNear: {
-                        near: { type: "Point", coordinates: [parseFloat(userLon), parseFloat(userLat)] },
+                        near: {
+                            type: "Point",
+                            coordinates: [
+                                parseFloat(userLon),
+                                parseFloat(userLat),
+                            ],
+                        },
                         distanceField: "distance",
-                        maxDistance: distance ? parseFloat(distance) * 1000 : 50000, // Convert to meters
+                        maxDistance: distance
+                            ? parseFloat(distance) * 1000
+                            : 50000000, // Convert to meters
                         query: finalQuery,
                         spherical: true,
                     },
                 },
                 {
-                    $sort: sortBy === "distance" 
-                        ? { distance: sortDirection === "desc" ? -1 : 1 }
-                        : Object.keys(sortOptions).length > 0 ? sortOptions : { _id: 1 },
+                    $addFields: {
+                        distanceInKm: { $divide: ["$distance", 1000] }, // Convert distance to kilometers
+                    },
+                },
+                {
+                    $sort:
+                        sortBy === "distance"
+                            ? {
+                                  distanceInKm:
+                                      sortDirection === "desc" ? -1 : 1,
+                              }
+                            : Object.keys(sortOptions).length > 0
+                            ? sortOptions
+                            : { _id: 1 },
+                },
+                {
+                    $project: {
+                        vector: 0, // Exclude the `vector` field
+                    },
                 },
             ]).exec();
         } else {
             doctors = await Doctor.find(finalQuery)
-                .select("-vector")
-                .sort(Object.keys(sortOptions).length > 0 ? sortOptions : { _id: 1 })
+                .sort(
+                    Object.keys(sortOptions).length > 0
+                        ? sortOptions
+                        : { _id: 1 }
+                )
                 .exec();
         }
 
@@ -163,4 +192,3 @@ export const findDoctor = async (req, res) => {
         });
     }
 };
-

@@ -87,7 +87,7 @@ const SignIn = () => {
                                     </Text>
                                     <TextInput
                                         className="border border-blue-300 rounded-lg p-4 bg-blue-50 text-lg font-poppins-regular"
-                                        placeholder="johndoe@gmail.com"
+                                        placeholder="ramkumar@gmail.com"
                                         onChangeText={handleChange("email")}
                                         onBlur={handleBlur("email")}
                                         value={values.email}

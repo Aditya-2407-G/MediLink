@@ -9,12 +9,6 @@ const ScreenLayout = () => {
 
             <Stack>
                 <Stack.Screen
-                    name="FindDoctor"
-                    options={{
-                        headerShown: false,
-                    }}
-                />
-                <Stack.Screen
                     name="DoctorInfo"
                     options={{
                         headerShown: false,
@@ -22,6 +16,12 @@ const ScreenLayout = () => {
                 />
                 <Stack.Screen
                     name="Notification"
+                    options={{
+                        headerShown: false,
+                    }}
+                />
+                <Stack.Screen
+                    name="AppointmentBooking"
                     options={{
                         headerShown: false,
                     }}

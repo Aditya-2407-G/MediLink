@@ -3,47 +3,23 @@ import { View, Text, Image, ScrollView, SafeAreaView, TouchableOpacity, Linking,
 import { Ionicons } from "@expo/vector-icons";
 import { useRoute } from "@react-navigation/native";
 import * as Location from 'expo-location';
+import { useNavigation } from "@react-navigation/native";
 
 const DoctorInfo = () => {
+    const navigation = useNavigation();
     const route = useRoute();
     let { doctor }: any = route.params;
     doctor=JSON.parse(doctor);
-    const [location, setLocation] = useState(null);
-
-    const GetLocation = async () => {
-        try {
-            // Check if location permission is granted
-            const { status } = await Location.getForegroundPermissionsAsync();
-            if (status !== "granted") {
-                const { status } = await Location.requestForegroundPermissionsAsync();
-                if (status !== "granted") {
-                    console.log("Permission not granted");
-                    return;
-                }
-            }
-
-            const currentLocation = await Location.getCurrentPositionAsync({});
-            setLocation(currentLocation);
-        } catch (error) {
-            console.error("Error getting location:", error);
-        }
-    };
-
-    useEffect(() => {
-        GetLocation();
-    }, []);
 
     const openMapsWithDirections = () => {
-        if (location) {
-            const userLat = location["coords"]["latitude"];
-            const userLon = location["coords"]["longitude"];
-            const doctorLat = doctor.location.coordinates[1];
-            const doctorLon = doctor.location.coordinates[0];
-            const url = `https://www.google.com/maps/dir/?api=1&origin=${userLat},${userLon}&destination=${doctorLat},${doctorLon}`;
-            Linking.openURL(url);
-        } else {
-            console.log('User location not available');
-        }
+        const doctorLat = doctor.location.coordinates[1];
+        const doctorLon = doctor.location.coordinates[0];
+        const url = `https://www.google.com/maps/dir/?api=1&destination=${doctorLat},${doctorLon}`;
+        Linking.openURL(url);
+    };
+    const handleBookAppointment = () => {
+        // @ts-ignore
+        navigation.navigate('AppointmentBooking', { doctor: JSON.stringify(doctor) });
     };
 
     return (
@@ -51,7 +27,7 @@ const DoctorInfo = () => {
             <ScrollView className="p-4">
                 <View className="items-center mb-6 mt-10">
                     <Image
-                        source={require("@/assets/images/avatar6.png")}
+                        source={doctor.profilePhoto = { uri: doctor.profilePhoto } }
                         className="w-32 h-32 rounded-full"
                     />
                     <Text className="font-poppins-bold text-blue-700 text-2xl mt-4">
@@ -111,6 +87,14 @@ const DoctorInfo = () => {
                         ₹{doctor.fees}
                     </Text>
                 </View>
+                <TouchableOpacity 
+                    className="bg-blue-600 p-4 rounded-2xl shadow-md mb-4"
+                    onPress={handleBookAppointment}
+                >
+                    <Text className="text-white text-center font-poppins-bold text-lg">
+                        Book Appointment
+                    </Text>
+                </TouchableOpacity>
             </ScrollView>
         </SafeAreaView>
     );

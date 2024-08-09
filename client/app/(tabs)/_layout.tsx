@@ -23,23 +23,6 @@ const TabLayout = () => {
                 }}
             >
                 <Tabs.Screen
-                    name="Appointments"
-                    options={{
-                        title: "Appointments",
-                        headerShown: false,
-                        tabBarIcon: ({ color, focused }) => (
-                            <TabIcon
-                                icon={icons.calendar}
-                                color={color}
-                                name="Appointments"
-                                focused={focused}
-                                containerStyle="w-6 h-6"
-                                iconStyle="gap-2"
-                            />
-                        ),
-                    }}
-                />
-                <Tabs.Screen
                     name="Home"
                     options={{
                         title: "Home",
@@ -52,10 +35,27 @@ const TabLayout = () => {
                                 focused={focused}
                                 containerStyle="w-6 h-6"
                                 iconStyle="gap-2"
-                            />
-                        ),
+                                />
+                            ),
                     }}
                 />
+                            <Tabs.Screen
+                                name="Appointments"
+                                options={{
+                                    title: "Appointments",
+                                    headerShown: false,
+                                    tabBarIcon: ({ color, focused }) => (
+                                        <TabIcon
+                                            icon={icons.calendar}
+                                            color={color}
+                                            name="Appointments"
+                                            focused={focused}
+                                            containerStyle="w-6 h-6"
+                                            iconStyle="gap-2"
+                                        />
+                                    ),
+                                }}
+                            />
                 <Tabs.Screen
                     name="Profile"
                     options={{

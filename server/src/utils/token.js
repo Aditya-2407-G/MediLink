@@ -7,7 +7,7 @@ export const createAccessToken = (user) => {
             role: user.role,
         },
         process.env.EXPO_PUBLIC_ACCESS_TOKEN_SECRET,
-        {expiresIn: '1d'}
+        {expiresIn: process.env.EXPO_PUBLIC_ACCESS_TOKEN_EXPIRY}
     )
 };
 
@@ -18,6 +18,6 @@ export const createRefreshToken = (user) => {
             role: user.role,
         },
         process.env.EXPO_PUBLIC_REFRESH_TOKEN_SECRET,
-        {expiresIn: '7d'}
+        {expiresIn: process.env.EXPO_PUBLIC_REFRESH_TOKEN_EXPIRY}
     )
 };

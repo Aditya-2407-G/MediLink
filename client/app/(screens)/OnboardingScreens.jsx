@@ -1,56 +1,70 @@
 import React from "react";
-import { Image, StyleSheet, TouchableOpacity, View, Text } from "react-native";
+import { StyleSheet, TouchableOpacity, View, Text } from "react-native";
 import Onboarding from "react-native-onboarding-swiper";
 import { router } from "expo-router";
-import { images } from "../../constants";
 import * as SecureStore from "expo-secure-store";
-import Lottie from "lottie-react-native";
 
 const OnboardingScreens = () => {
     const onboardingPages = [
         {
-            backgroundColor: "#B2EBF2",
-            image: <Image source={images.Veersa} style={styles.image} />,
-            title: "Veersa Hackathon",
-            subtitle: "A Seamless Doctor Booking Experience with React Native Expo",
+            backgroundColor: "#eff6ff",
+
+            image: <></>,
+            title: (
+                <Text className="font-poppins-bold text-6xl text-blue-600 pt-10 text-start w-full">
+                    MediLink
+                </Text>
+            ),
+            subtitle: (
+                <Text className="font-poppins-medium text-xl text-gray-500 mt-4 text-start">
+                    Find doctors around you and enjoy a seamless appointment
+                    booking experience.
+                </Text>
+            ),
         },
         {
-            backgroundColor: "#e9bcbe",
-            image: (
-                <View className="self-center">
-                    <Lottie
-                        source={require("../../assets/animations/animation.json")}
-                        autoPlay
-                        style={{ height: 300, width: 300 }}
-                    />
-                </View>
+            backgroundColor: "#eff6ff",
+            image: <></>,
+            title: (
+                <Text className="font-poppins-bold text-5xl text-blue-600 pt-10 whitespace-bre text-start w-full">
+                    Book an appointment
+                </Text>
             ),
-            title: "Become the Star",
-            subtitle: "Let the spotlight capture you",
+            subtitle: (
+                <Text className="font-poppins-medium text-xl text-gray-500 mt-4 text-start w-full">
+                    Find your ideal doctor by searching, applying filters, and
+                    exploring profiles. Once you've made your choice, easily
+                    book an appointment right from the doctor's profile.
+                </Text>
+            ),
         },
         {
-            backgroundColor: "#FAD4B8",
-            image: (
-                <View className="self-center">
-                    <Lottie
-                        source={require("../../assets/animations/schedule.json")}
-                        autoPlay
-                        style={{ height: 300, width: 300 }}
-                    />
-                </View>
+            backgroundColor: "#eff6ff",
+            image: <></>,
+            title: (
+                <Text className="font-poppins-bold text-5xl text-blue-600 pt-10 w-full whitespace-pre-wrap">
+                    Never miss an appointment
+                </Text>
             ),
-            title: "Share Your Favorites",
-            subtitle: "Share your thoughts with like-minded people",
+            subtitle: (
+                <Text className="font-poppins-medium text-xl text-gray-500 mt-5 text-start">
+                    View all your appointments in the appointment
+                    section. Each appointment card features a map link for easy
+                    navigation to the doctor, and you can also cancel any
+                    appointment if needed.
+                </Text>
+            ),
         },
     ];
 
     const handleDone = async () => {
         await SecureStore.setItemAsync("onboardingShown", "true");
-        router.replace("/");
+        router.replace("/SignIn");
     };
     const doneButton = ({ ...props }) => (
         <TouchableOpacity>
             <Text
+                className="font-poppins-regular"
                 style={{ fontSize: 16, color: "#333", padding: 20 }}
                 {...props}
             >
@@ -76,23 +90,28 @@ const OnboardingScreens = () => {
 
 const styles = StyleSheet.create({
     container: {
+        backgroundColor: "#eff6ff",
         flex: 1,
-        paddingHorizontal: 30,
+        paddingHorizontal: 20,
     },
     imageContainer: {
-        marginBottom: 20,
+        display: "none",
+        height: 200,
+        marginBottom: 10,
     },
     image: {
-        width: "100%",
-        height: undefined,
-        aspectRatio: 1.5,
+        display: "none",
+        height: "80%",
+        aspectRatio: 1,
         resizeMode: "contain",
+        padding: 6,
     },
     title: {
         fontSize: 24,
         fontWeight: "bold",
         color: "#000",
         marginBottom: 10,
+        textAlign: "start",
     },
     subtitle: {
         fontSize: 16,

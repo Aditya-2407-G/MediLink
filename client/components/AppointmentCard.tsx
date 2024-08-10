@@ -3,14 +3,13 @@ import { View, Text, TouchableOpacity, Linking, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
 
-export const AppointmentCard = ({ appointment, fetchAppointments }) => {
+export const AppointmentCard = ({ appointment: { item }, fetchAppointments }) => {
     function formatDate(dateStr) {
         const date = new Date(dateStr);
         const day = date.getDate();
         const month = date.getMonth(); // 0-based index
         const year = date.getFullYear();
 
-        // Array of month names
         const months = [
             "Jan",
             "Feb",
@@ -49,29 +48,27 @@ export const AppointmentCard = ({ appointment, fetchAppointments }) => {
     }
     
     const openMapsWithDirections = () => {
-        const doctorLat = appointment.item.doctor_id.location.coordinates[1];
-        const doctorLon = appointment.item.doctor_id.location.coordinates[0];
+        const doctorLat = item.doctor_id.location.coordinates[1];
+        const doctorLon = item.doctor_id.location.coordinates[0];
         const url = `https://www.google.com/maps/dir/?api=1&destination=${doctorLat},${doctorLon}`;
         Linking.openURL(url);
     }
     
     
 
-    const cancelAppointment=async()=>{
-        try{
-            console.log(appointment)
+    const cancelAppointment = async () => {
+        try {
+            console.log(item)
             console.log("inside cancel appointment")
-            const response= await axios.get('http://192.168.0.174:8000/appointment/cancel',{
-                params:{
-                    appointmentId:appointment.item._id
+            const response = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/appointment/cancel`, {
+                params: {
+                    appointmentId: item._id
                 }
             })
-            
-            Alert.alert("Success","Appointment cancelled successfully")
-        }catch(err){
-            console.log("Error in cancelling appointment: ",err)
-        }
-        finally{
+            return response;
+        } catch (err) {
+            console.log("Error in cancelling appointment: ", err)
+        } finally {
             fetchAppointments()
         }
     }
@@ -82,21 +79,21 @@ export const AppointmentCard = ({ appointment, fetchAppointments }) => {
                 <View className="flex-1">
                     <View className="flex flex-row justify-between items-center">
                         <Text className="text-blue-600 text-lg font-poppins-bold">
-                            {formatTime2(appointment.item.timeSlot)}{" "}
+                            {formatTime2(item.timeSlot)}{" "}
                         </Text>
                         <Text className="text-blue-600 text-lg font-poppins-bold">
-                            {formatDate(appointment.item.appointmentDate)}
+                            {formatDate(item.appointmentDate)}
                         </Text>
                     </View>
                     <Text className="text-gray-500 text-lg font-poppins-medium">
-                        {appointment.item.doctor_id.doctorName}
+                        {item.doctor_id.doctorName}
                     </Text>
                     <Text className="text-gray-500 text-base font-poppins-regular">
-                        {appointment.item.doctor_id.specialization}
+                        {item.doctor_id.specialization}
                     </Text>
                     <Text className="text-gray-500 text-base font-poppins-regular">
-                        {appointment.item.doctor_id.hospitalName},{" "}
-                        {appointment.item.doctor_id.hospitalAddress}
+                        {item.doctor_id.hospitalName},{" "}
+                        {item.doctor_id.hospitalAddress}
                     </Text>
                 </View>
             </View>

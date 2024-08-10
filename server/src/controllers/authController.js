@@ -34,7 +34,7 @@ async function generateEmbeddings(text) {
 }
 
 export const register = async (req, res) => {
-    console.log("Regiester function called");
+    console.log("Register function called");
     try {
         const {
             name,
@@ -76,12 +76,12 @@ export const register = async (req, res) => {
 
         await user.save();
 
-        if (role.toLocaleLowerCase() === "doctor") {
+        if (role.toLowerCase() === "doctor") {
             console.log("We are adding doctor");
-            const doctorText = `Doctor ${name}, speacializing in ${specialization} sits at ${hospitalName}, ${hospitalAddress}, ${city}, ${state}, ${country}`;
+            const doctorText = `Doctor ${name}, specializing in ${specialization} sits at ${hospitalName}, ${hospitalAddress}, ${city}, ${state}, ${country}`;
             // Generate embeddings using the Python script
             const vector = await generateEmbeddings(doctorText);
-            console.log("doctor created with vector");
+            console.log("Doctor created with vector");
 
             const doctor = new Doctor({
                 user_id: user._id,
@@ -150,39 +150,31 @@ export const login = async (req, res) => {
             }
         }
 
-        const options = {
-            httpOnly: true,
-            secure: true,
-        };
-
-        res.status(200)
-            .cookie("accessToken", accessToken, options)
-            .cookie("refreshToken", refreshToken, options)
-            .json({
-                accessToken,
-                refreshToken,
-                user: {
-                    id: userObj._id,
-                    name: userObj.name,
-                    email: userObj.email,
-                    role: userObj.role,
-                    // Include doctor details if available
-                    doctorDetails: userObj.doctorName
-                        ? {
-                              doctorName: userObj.doctorName,
-                              hospitalName: userObj.hospitalName,
-                              hospitalAddress: userObj.hospitalAddress,
-                              specialization: userObj.specialization,
-                              fees: userObj.fees,
-                              city: userObj.city,
-                              state: userObj.state,
-                              country: userObj.country,
-                              licence: userObj.licence,
-                              experience: userObj.experience,
-                          }
-                        : null,
-                },
-            });
+        res.status(200).json({
+            accessToken,
+            refreshToken,
+            user: {
+                id: userObj._id,
+                name: userObj.name,
+                email: userObj.email,
+                role: userObj.role,
+                // Include doctor details if available
+                doctorDetails: userObj.doctorName
+                    ? {
+                          doctorName: userObj.doctorName,
+                          hospitalName: userObj.hospitalName,
+                          hospitalAddress: userObj.hospitalAddress,
+                          specialization: userObj.specialization,
+                          fees: userObj.fees,
+                          city: userObj.city,
+                          state: userObj.state,
+                          country: userObj.country,
+                          licence: userObj.licence,
+                          experience: userObj.experience,
+                      }
+                    : null,
+            },
+        });
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: "Error Logging In" });
@@ -191,7 +183,7 @@ export const login = async (req, res) => {
 
 export const refresh = async (req, res) => {
     try {
-        const refreshToken = req.cookies.refreshToken;
+        const { refreshToken } = req.headers;
 
         if (!refreshToken) {
             return res.status(403).json({ message: "User Not Authenticated" });
@@ -214,15 +206,7 @@ export const refresh = async (req, res) => {
         user.refreshToken = newRefreshToken;
         await user.save();
 
-        const options = {
-            httpOnly: true,
-            secure: true,
-        };
-
-        res.status(200)
-            .cookie("accessToken", newToken, options)
-            .cookie("refreshToken", newRefreshToken, options)
-            .json({ message: "Token Refreshed Successfully" });
+        res.status(200).json({ accessToken: newToken, refreshToken: newRefreshToken, message: "Token Refreshed Successfully" });
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: "Error Refreshing Token" });
@@ -238,10 +222,7 @@ export const logout = async (req, res) => {
             { $unset: { refreshToken: 1 } }
         );
 
-        res.status(200)
-            .clearCookie("accessToken")
-            .clearCookie("refreshToken")
-            .json({ message: "User Logged Out Successfully" });
+        res.status(200).json({ message: "User Logged Out Successfully" });
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: "Error Logging Out" });

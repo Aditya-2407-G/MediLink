@@ -7,6 +7,8 @@ import {
     FlatList,
     SafeAreaView,
     RefreshControl,
+    ActivityIndicator,
+    Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
@@ -15,21 +17,22 @@ import { router } from "expo-router";
 import { FilterModal } from "../../components/FilterModal";
 import { DoctorCard } from "@/components/DoctorCard";
 import * as Location from "expo-location";
-
+import { useAuth } from "@/context/AuthContext";
 
 const Home = () => {
-    
     const [doctors, setDoctors] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
     const [showFilterModal, setShowFilterModal] = useState(false);
     const [filters, setFilters] = useState({});
     const [isFilterApplied, setIsFilterApplied] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
 
-    // Get user's current location and fetch initial data
+    const { logout } = useAuth();
+
     const getLocationAndFetchData = async () => {
         try {
-            // Check if location permission is granted
+            setLoading(true);
             const { status } = await Location.getForegroundPermissionsAsync();
             if (status !== "granted") {
                 const { status } =
@@ -39,11 +42,10 @@ const Home = () => {
                     return;
                 }
             }
-            // Get the current location
+
             const { coords } = await Location.getCurrentPositionAsync({});
             const { latitude, longitude } = coords;
 
-            // Set location in filters
             const updatedFilters = {
                 ...filters,
                 userLat: latitude,
@@ -51,34 +53,35 @@ const Home = () => {
             };
             setFilters(updatedFilters);
 
-            // Fetch initial data based on location
             const response = await axios.get(
-                `http://192.168.0.174:8000/doctor/search`, // Use your appropriate endpoint
+                `${process.env.EXPO_PUBLIC_API_URL}/doctor/search`,
                 {
                     params: {
                         ...updatedFilters,
-                        sortBy: "distance", // Sort by distance from the user's location
-                        sortDirection: "asc", // Closest to farthest
+                        sortBy: "distance",
+                        sortDirection: "asc",
                     },
                 }
             );
             setDoctors(response.data);
         } catch (error) {
             console.error("Error fetching doctors based on location:", error);
+        } finally {
+            setLoading(false);
         }
     };
 
     useEffect(() => {
-        getLocationAndFetchData(); // Call this only on initial render
-    }, []); // Empty dependency array ensures this only runs on initial render
+        getLocationAndFetchData();
+    }, []);
 
-    // Debounced fetch doctors for search and filter updates
     const debouncedFetchDoctors = useCallback(
         debounce(async (query, currentFilters) => {
             if (showFilterModal) return;
             try {
+                setLoading(true);
                 const response = await axios.get(
-                    `http://192.168.0.174:8000/doctor/search`,
+                    `${process.env.EXPO_PUBLIC_API_URL}/doctor/search`,
                     {
                         params: {
                             searchTerm: query,
@@ -89,6 +92,8 @@ const Home = () => {
                 setDoctors(response.data);
             } catch (error) {
                 console.error("Error fetching doctors:", error);
+            } finally {
+                setLoading(false);
             }
         }, 800),
         []
@@ -118,26 +123,44 @@ const Home = () => {
         getLocationAndFetchData().then(() => setRefreshing(false));
     }, []);
 
+    const handleLogout = async () => {
+        try {
+            const res = await logout();
+            if (res.status === 200) {
+                router.replace("/SignIn");
+            } else {
+                Alert.alert("Sorry", "Logout failed. Please try again.");
+            }
+        } catch (error) {
+            Alert.alert(
+                "Sorry",
+                "An unexpected error occurred. Please try again."
+            );
+            console.log("Error in logging out: ", error);
+        }
+    };
+
     return (
         <SafeAreaView className="flex-1 bg-blue-50 pt-5">
-            {/* Header */}
             <View className="bg-blue-600 p-10 rounded-b-3xl shadow-lg">
                 <View className="flex-row justify-between items-center">
                     <View>
-                        <Text className="text-white text-3xl font-poppins-medium">
+                        <Text className="text-white text-3xl font-poppins-semibold">
                             MediLink
                         </Text>
                         <Text className="text-blue-100 text-base mt-1 font-poppins-light">
                             Your Health, Our Priority
                         </Text>
                     </View>
-                    <TouchableOpacity className="bg-blue-500 p-2 rounded-full">
-                        <Ionicons name="log-out" size={24} color="white" />
+                    <TouchableOpacity
+                        className="bg-blue-500 p-2 rounded-full -mr-2 -mt-1"
+                        onPress={handleLogout}
+                    >
+                        <Ionicons name="power" size={24} color="white" />
                     </TouchableOpacity>
                 </View>
             </View>
 
-            {/* Search Bar */}
             <View className="bg-white mx-4 -mt-6 rounded-full flex-row items-center p-4 shadow-lg">
                 <Ionicons name="search" size={24} color="#3B82F6" />
                 <TextInput
@@ -155,36 +178,39 @@ const Home = () => {
                 </TouchableOpacity>
             </View>
 
-            {/* Doctors List */}
             <View className="mx-4 my-4">
                 <Text className="text-xl font-poppins-bold text-blue-800 mb-4">
                     Available Doctors
                 </Text>
-                <FlatList
-                    data={doctors}
-                    renderItem={({ item }) => (
-                        <DoctorCard
-                            doctor={item}
-                            onPress={() =>
-                                router.push({
-                                    pathname: "/DoctorInfo",
-                                    params: {
-                                        doctor: JSON.stringify(item),
-                                    },
-                                })
-                            }
-                        />
-                    )}
-                    keyExtractor={(item) => item._id}
-                    showsVerticalScrollIndicator={false}
-                    contentContainerStyle={{ paddingBottom: 100 }}
-                    refreshControl={
-                        <RefreshControl
-                            refreshing={refreshing}
-                            onRefresh={onRefresh}
-                        />
-                    }
-                />
+                {loading ? (
+                    <ActivityIndicator size="large" color="#3B82F6" />
+                ) : (
+                    <FlatList
+                        data={doctors}
+                        renderItem={({ item }) => (
+                            <DoctorCard
+                                doctor={item}
+                                onPress={() =>
+                                    router.push({
+                                        pathname: "/DoctorInfo",
+                                        params: {
+                                            doctor: JSON.stringify(item),
+                                        },
+                                    })
+                                }
+                            />
+                        )}
+                        keyExtractor={(item) => item._id}
+                        showsVerticalScrollIndicator={false}
+                        contentContainerStyle={{ paddingBottom: 100 }}
+                        refreshControl={
+                            <RefreshControl
+                                refreshing={refreshing}
+                                onRefresh={onRefresh}
+                            />
+                        }
+                    />
+                )}
             </View>
 
             {showFilterModal && (

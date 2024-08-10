@@ -6,6 +6,9 @@ import logout from "../assets/icons/logout.png";
 import menu from "../assets/icons/menu.png";
 import Profile from "../assets/icons/profile.png";
 import calendar from "../assets/icons/calendar.png"; 
+import Feather from "../assets/icons/feather.png";
+import Crystal from "../assets/icons/crystal-ball.png";
+import Sparkel from "../assets/icons/sparkler.png";
 
 export default {    
     eyeHide,
@@ -15,5 +18,8 @@ export default {
     logout,
     menu,
     Profile,
-    calendar
+    calendar,
+    Feather,
+    Crystal,
+    Sparkel,
 }

@@ -12,7 +12,7 @@ export const TabIcon = ({icon,color,name,focused,containerStyle, iconStyle}: any
 
             />
             <Text
-                className={`${focused ? "font-semibold" : "font-regular"} text-xs`}
+                className={`${focused ? "font-poppins-semibold" : "font-poppins-regular"} text-xs`}
                 style={{ color: color }}
             >
                 {name}

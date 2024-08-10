@@ -4,6 +4,9 @@ import { icons } from "../../constants";
 import { TabIcon } from "../../components/TabIcon";
 
 const TabLayout = () => {
+
+    
+
     return (
         <>
             <StatusBar backgroundColor="#161622" style="light" />
@@ -57,15 +60,15 @@ const TabLayout = () => {
                                 }}
                             />
                 <Tabs.Screen
-                    name="Profile"
+                    name="AISeek"
                     options={{
-                        title: "Profile",
+                        title: "AISeek",
                         headerShown: false,
                         tabBarIcon: ({ color, focused }) => (
                             <TabIcon
-                                icon={icons.Profile}
+                                icon={icons.Crystal}
                                 color={color}
-                                name="Profile"
+                                name="AI Seek"
                                 focused={focused}
                                 containerStyle="w-6 h-6"
                                 iconStyle="gap-2"

@@ -13,6 +13,7 @@ import CustomButton from "@/components/CustomButton";
 import * as Yup from "yup";
 import { Link, router } from "expo-router";
 import { useAuth } from "@/context/AuthContext";
+import * as SecureStorage from "expo-secure-store";
 
 const formSchema = Yup.object().shape({
     email: Yup.string().email().required("Email is required"),

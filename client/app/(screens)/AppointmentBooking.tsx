@@ -90,7 +90,7 @@ const AppointmentBooking = () => {
     const fetchBookedSlots = useCallback(async () => {
         try {
             const response = await axios.get(
-                `http://192.168.0.174:8000/appointment/check-availability`,
+                `${process.env.EXPO_PUBLIC_API_URL}/appointment/check-availability`,
                 {
                     params: {
                         doctor_id: parsedDoctor._id,
@@ -168,9 +168,8 @@ const AppointmentBooking = () => {
         }
 
         try {
-            // Send a POST request to the server to book the appointment
             const response = await axios.post(
-                "http://192.168.0.174:8000/appointment/book",
+                `${process.env.EXPO_PUBLIC_API_URL}/appointment/book`,
                 {
                     doctor_id: parsedDoctor._id,
                     appointmentDate: selectedDate,
@@ -178,9 +177,7 @@ const AppointmentBooking = () => {
                 }
             );
 
-            // Check the response for errors
             if (response.status === 201) {
-                // If booking is successful, proceed to add the event to the calendar
                 const [startTime, endTime] = slot.split("-");
                 const appointmentDate = new Date(
                     `${selectedDate}T${startTime}:00`
@@ -207,7 +204,6 @@ const AppointmentBooking = () => {
 
                 Alert.alert("Success", "Appointment booked successfully!");
             } else if (response.status === 400) {
-                // the slot is already booked
                 Alert.alert(
                     "Slot Already Booked",
                     response.data.message ||

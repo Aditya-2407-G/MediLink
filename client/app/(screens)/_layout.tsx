@@ -15,12 +15,6 @@ const ScreenLayout = () => {
                     }}
                 />
                 <Stack.Screen
-                    name="Notification"
-                    options={{
-                        headerShown: false,
-                    }}
-                />
-                <Stack.Screen
                     name="AppointmentBooking"
                     options={{
                         headerShown: false,

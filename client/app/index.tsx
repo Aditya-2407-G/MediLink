@@ -1,54 +1,57 @@
-import { ScrollView, Text, View, StatusBar } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import React from "react";
-import CustomButton from "../components/CustomButton";
-import { router } from "expo-router";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, SafeAreaView, View, StyleSheet } from "react-native";
+import { Redirect } from "expo-router";
 import { useAuth } from "@/context/AuthContext";
+import OnboardingScreens from "./(screens)/OnboardingScreens";
+import * as SecureStore from 'expo-secure-store';
 
 export default function Index() {
-    return (
-        <SafeAreaView className="flex-1 bg-[#161622]"> 
-            <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}> 
-                {/* @ts-ignore */}
-                <StatusBar backgroundColor="#161622" style="light" /> 
+    const [loading, setLoading] = useState(true);
+    const [onboardingDone, setOnboardingDone] = useState(false);
+    const { authenticated, checkAuthStatus } = useAuth();
 
-                <View>
-                    <Text className="text-white font-poppins-regular text-center text-3xl mb-10">
-                        Welcome to MediLink!
-                    </Text>
-                </View>
+    useEffect(() => {
+        const initialize = async () => {
+            await checkAuthStatus();  
+            const value = await SecureStore.getItemAsync("onboardingShown");
+            setOnboardingDone(value === 'true');
+            setLoading(false);
+        };
 
-                <View className="flex items-center">
-                    <CustomButton
-                        title="Sign In"
-                        handlePress={() => router.push("/SignIn")}
-                        containerStyles="bg-green-600 w-2/3 mb-4" 
-                        textStyles="text-xl text-white"
-                        isLoading={false}  
-                    />
-                    <CustomButton
-                        title="Sign Up"
-                        handlePress={() => router.push("/SignUp")}
-                        containerStyles="bg-green-600 w-2/3 mb-4"
-                        textStyles="text-xl text-white"
-                        isLoading={false}
-                    />
-                    <CustomButton
-                        title="Home"
-                        handlePress={() => router.push("/Home")}
-                        containerStyles="bg-green-600 w-2/3 mb-4"
-                        textStyles="text-xl text-white"
-                        isLoading={false}
-                    />
-                    <CustomButton
-                        title="Notifications"
-                        handlePress={() => router.push("/Notification")}
-                        containerStyles="bg-green-600 w-2/3"
-                        textStyles="text-xl text-white"
-                        isLoading={false}
-                    />
+        initialize();
+    }, []);
+
+    if (loading) {
+        return (
+            <SafeAreaView style={styles.container}>
+                <View style={styles.loaderContainer}>
+                    <ActivityIndicator size="large" color="#ffffff" />
                 </View>
-            </ScrollView>
-        </SafeAreaView>
-    );
+            </SafeAreaView>
+        );
+    }
+
+    if (authenticated) {
+        return <Redirect href="/Home" />;
+    }
+
+    if (!onboardingDone) {
+        return <OnboardingScreens />;
+    }
+
+    return <Redirect href="/SignIn" />;
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: "#161622",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    loaderContainer: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+    },
+});

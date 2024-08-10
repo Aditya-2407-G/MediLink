@@ -1,7 +1,10 @@
-import { Redirect, SplashScreen, Stack } from "expo-router";
+import { Slot, SplashScreen, Stack, useRouter } from "expo-router";
 import { useFonts } from "expo-font";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import AuthProvider from "../context/AuthContext.js";
+import * as SecureStore from "expo-secure-store";
+
+SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
     const [fontLoaded, error] = useFonts({
@@ -16,25 +19,56 @@ export default function RootLayout() {
         "Poppins-Thin": require("../assets/fonts/Poppins-Thin.ttf"),
     });
 
+    const [isReady, setIsReady] = useState(false);
+    const [hasSeenOnboarding, setHasSeenOnboarding] = useState(false);
+    const router = useRouter();
+
     useEffect(() => {
-        if (error) throw error;
-
-        if (fontLoaded) {
-            SplashScreen.hideAsync();
+        async function checkOnboardingStatus() {
+            try {
+                const seenOnboarding = await SecureStore.getItemAsync('hasSeenOnboarding');
+                setHasSeenOnboarding(seenOnboarding === 'true');
+            } catch (e) {
+                console.warn(e);
+            }
         }
-    }, [fontLoaded, error]);
 
-    if (!fontLoaded) {
-        return null;
-    }
+        async function prepare() {
+            try {
+                await checkOnboardingStatus();
+                // Simulate some loading time
+                await new Promise(resolve => setTimeout(resolve, 2000));
+            } catch (e) {
+                console.warn(e);
+            } finally {
+                if (fontLoaded) {
+                    await SplashScreen.hideAsync();
+                }
+                setIsReady(true);
+            }
+        }
 
-    if (!fontLoaded && !error) {
-        return null;
+        prepare();
+    }, [fontLoaded]);
+
+    useEffect(() => {
+        if (isReady) {
+            if (hasSeenOnboarding) {
+                router.replace("/"); // Navigate to the main screen if onboarding is already seen
+            } else {
+                router.replace("/onboarding"); // Navigate to onboarding if not seen
+            }
+        }
+    }, [isReady, hasSeenOnboarding, router]);
+
+    if (!fontLoaded || !isReady) {
+        return null; // This will keep the splash screen visible
     }
 
     return (
         <AuthProvider>
             <Stack>
+                <Stack.Screen name="onboarding" options={{ headerShown: false }} />
                 <Stack.Screen name="index" options={{ headerShown: false }} />
                 <Stack.Screen name="(auth)" options={{ headerShown: false }} />
                 <Stack.Screen name="(tabs)" options={{ headerShown: false }} />

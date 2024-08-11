@@ -16,13 +16,14 @@ const TabLayout = () => {
                         height: 70,
                         borderRadius: 35, 
                         position: "absolute",
-                        bottom:20,
+                        bottom: 20,
                         left: 20,
                         right: 20,
                         shadowColor: "#000", 
                         shadowOffset: { width: 0, height: 2 }, 
                         shadowOpacity: 0.3, 
-                        shadowRadius: 4, 
+                        shadowRadius: 4,
+                        paddingHorizontal: 10, // Add padding to prevent clipping
                     },
                 }}
             >

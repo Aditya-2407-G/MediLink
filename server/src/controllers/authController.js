@@ -3,38 +3,37 @@ import jwt from "jsonwebtoken";
 import { User } from "../models/User.js";
 import { createAccessToken, createRefreshToken } from "../utils/token.js";
 import { Doctor } from "../models/Doctor.js";
-import { exec } from "child_process";
-import util from "util";
 
-const execPromise = util.promisify(exec);
-
-// function that runs a python script that converts doctor description into a vector space, that fascilitates vector search
+// function to generate text embeddings using hugging face inference API
 async function generateEmbeddings(text) {
-    try {
-        const env = { ...process.env, HF_HUB_DISABLE_SYMLINKS_WARNING: "1" };
-        const { stdout, stderr } = await execPromise(
-            `call ../.venv/Scripts/activate && python ./src/utils/generate_embeddings.py "${text}"`,
-            { env }
-        );
-        if (stderr) {
-            console.error(`Error: ${stderr}`);
-            return null;
+    console.log(JSON.stringify({ inputs: text }));
+    const response = await fetch(
+        "https://api-inference.huggingface.co/models/sentence-transformers/all-MiniLM-L6-v2",
+        {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${process.env.HUGGINGFACE_API_TOKEN}`,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                inputs: {
+                    source_sentence: text,
+                    sentences: [text],
+                },
+            }),
         }
-        const vector = JSON.parse(stdout);
-        if (
-            !Array.isArray(vector) ||
-            !vector.every((num) => typeof num === "number")
-        ) {
-            throw new Error("Invalid vector format");
-        }
-        return vector;
-    } catch (error) {
-        console.error(`Exec error: ${error}`);
-        return null;
+    );
+    const data = await response.json();
+    console.log("RESPONSE: ", data);
+
+    if (!response.ok) {
+        throw new Error(`Error fetching embeddings: ${response.statusText}`);
     }
+
+    return data;
 }
 
-// function to register user, both doctor and patient 
+// function to register user, both doctor and patient
 export const register = async (req, res) => {
     try {
         const {
@@ -55,12 +54,12 @@ export const register = async (req, res) => {
             experience,
         } = req.body;
 
-        // return with status code 400 if any field is empty 
+        // return with status code 400 if any field is empty
         if ([name, email, password].some((field) => field?.trim() === "")) {
             return res.status(400).json({ message: "Please Fill All Fields" });
         }
 
-        // check if email is already taken 
+        // check if email is already taken
         const existedUser = await User.findOne({ email });
 
         // if it exists, return with status code 400
@@ -79,12 +78,12 @@ export const register = async (req, res) => {
             role,
         });
 
-        // save user 
+        // save user
         await user.save();
 
-        // create a doctor if role selected is doctor 
+        // create a doctor if role selected is doctor
         if (role.toLowerCase() === "doctor") {
-            const doctorText = `Doctor ${name}, specializing in ${specialization} sits at ${hospitalName}, ${hospitalAddress}, ${city}, ${state}, ${country}`;
+            const doctorText = `Doctor ${name} specializing in ${specialization} sits at ${hospitalName} ${hospitalAddress} ${city} ${state} ${country}`;
             // generate embeddings using the python script
             const vector = await generateEmbeddings(doctorText);
 
@@ -107,7 +106,7 @@ export const register = async (req, res) => {
                 experience: parseInt(experience),
             });
 
-            // save the doctor 
+            // save the doctor
             await doctor.save();
             return res
                 .status(201)
@@ -120,7 +119,7 @@ export const register = async (req, res) => {
     }
 };
 
-// function that handles user login, doctor and patient 
+// function that handles user login, doctor and patient
 export const login = async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -144,7 +143,6 @@ export const login = async (req, res) => {
         let userObj = user.toObject(); // Convert user document to plain object
 
         if (userObj.role.toLowerCase() === "doctor") {
-
             const doctor = await Doctor.findOne({ user_id: userObj._id });
 
             if (doctor) {
@@ -212,14 +210,18 @@ export const refresh = async (req, res) => {
         user.refreshToken = newRefreshToken;
         await user.save();
 
-        res.status(200).json({ accessToken: newToken, refreshToken: newRefreshToken, message: "Token Refreshed Successfully" });
+        res.status(200).json({
+            accessToken: newToken,
+            refreshToken: newRefreshToken,
+            message: "Token Refreshed Successfully",
+        });
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: "Error Refreshing Token" });
     }
 };
 
-// function that handles user logout 
+// function that handles user logout
 export const logout = async (req, res) => {
     try {
         const userId = req.user.userId;

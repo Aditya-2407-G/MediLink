@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Image, View, Text } from "react-native";
+import { View } from "react-native";
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, withSpring } from "react-native-reanimated";
 
 export const TabIcon = ({ icon, color, name, focused }) => {
@@ -29,7 +29,7 @@ export const TabIcon = ({ icon, color, name, focused }) => {
     });
 
     return (
-        <View style={{ alignItems: "center", justifyContent: "center" }}>
+        <View style={{ alignItems: "center", justifyContent: "center", width:60, height:60 }}>
             <Animated.View style={{ alignItems: "center", justifyContent: "center" }}>
                 <Animated.Image
                     source={icon}

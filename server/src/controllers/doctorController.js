@@ -1,8 +1,4 @@
 import { Doctor } from "../models/Doctor.js";
-import { exec } from "child_process";
-import util from "util";
-
-const execPromise = util.promisify(exec);
 
 // function that finds doctor based on search results 
 export const findDoctor = async (req, res) => {
@@ -105,31 +101,35 @@ export const findDoctor = async (req, res) => {
     }
 };
 
-// function that generates embeddings for vector search 
+// function to generate text embeddings using hugging face inference API
 async function generateEmbeddings(text) {
-    try {
-        const env = { ...process.env, HF_HUB_DISABLE_SYMLINKS_WARNING: "1" };
-        const { stdout, stderr } = await execPromise(
-            `call ../.venv/Scripts/activate && python ./src/utils/generate_embeddings.py "${text}"`,
-            { env }
-        );
-        if (stderr) {
-            console.error(`Error: ${stderr}`);
-            return null;
+    console.log(JSON.stringify({ inputs: text }));
+    const response = await fetch(
+        "https://api-inference.huggingface.co/models/sentence-transformers/all-MiniLM-L6-v2",
+        {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${process.env.HUGGINGFACE_API_TOKEN}`,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                inputs: {
+                    source_sentence: text,
+                    sentences: [text],
+                },
+            }),
         }
-        const vector = JSON.parse(stdout);
-        if (
-            !Array.isArray(vector) ||
-            !vector.every((num) => typeof num === "number")
-        ) {
-            throw new Error("Invalid vector format");
-        }
-        return vector;
-    } catch (error) {
-        console.error(`Exec error: ${error}`);
-        return null;
+    );
+    const data = await response.json();
+    console.log("RESPONSE: ", data);
+
+    if (!response.ok) {
+        throw new Error(`Error fetching embeddings: ${response.statusText}`);
     }
+
+    return data;
 }
+
 
 // function that handles vector search to give results of doctors based on search queries
 export const aiSeek = async (req, res) => {

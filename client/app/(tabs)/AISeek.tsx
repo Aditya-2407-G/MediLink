@@ -14,6 +14,7 @@ import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import { DoctorCard } from "@/components/DoctorCard";
 import * as Location from "expo-location";
 import { openSettings } from "expo-linking";
+import { router } from "expo-router";
 
 const AISeek = () => {
     const [searchQuery, setSearchQuery] = useState("");
@@ -107,11 +108,13 @@ const AISeek = () => {
                         renderItem={({ item }) => (
                             <DoctorCard
                                 doctor={item}
-                                onPress={() =>
-                                    console.log(
-                                        "Doctor selected:",
-                                        item.doctorName
-                                    )
+                                onPress={() => 
+                                    router.push({
+                                        pathname: "/DoctorInfo",
+                                        params: {
+                                            doctor: JSON.stringify(item),
+                                        }
+                                    })
                                 }
                             />
                         )}

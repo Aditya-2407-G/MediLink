@@ -4,11 +4,8 @@ import { icons } from "../../constants";
 import { TabIcon } from "../../components/TabIcon";
 
 const TabLayout = () => {
-    // adding all the tabs
     return (
-        
         <>
-            
             <StatusBar backgroundColor="#161622" style="light" />
             <Tabs
                 screenOptions={{
@@ -17,11 +14,15 @@ const TabLayout = () => {
                     tabBarShowLabel: false,
                     tabBarStyle: {
                         height: 70,
-                        borderRadius: 100,
+                        borderRadius: 35, 
                         position: "absolute",
                         bottom: 20,
                         left: 20,
                         right: 20,
+                        shadowColor: "#000", 
+                        shadowOffset: { width: 0, height: 2 }, 
+                        shadowOpacity: 0.3, 
+                        shadowRadius: 4, 
                     },
                 }}
             >
@@ -36,29 +37,25 @@ const TabLayout = () => {
                                 color={color}
                                 name="Home"
                                 focused={focused}
-                                containerStyle="w-6 h-6"
-                                iconStyle="gap-2"
-                                />
-                            ),
+                            />
+                        ),
                     }}
                 />
-                            <Tabs.Screen
+                <Tabs.Screen
+                    name="Appointments"
+                    options={{
+                        title: "Appointments",
+                        headerShown: false,
+                        tabBarIcon: ({ color, focused }) => (
+                            <TabIcon
+                                icon={icons.calendar}
+                                color={color}
                                 name="Appointments"
-                                options={{
-                                    title: "Appointments",
-                                    headerShown: false,
-                                    tabBarIcon: ({ color, focused }) => (
-                                        <TabIcon
-                                            icon={icons.calendar}
-                                            color={color}
-                                            name="Appointments"
-                                            focused={focused}
-                                            containerStyle="w-6 h-6"
-                                            iconStyle="gap-2"
-                                        />
-                                    ),
-                                }}
+                                focused={focused}
                             />
+                        ),
+                    }}
+                />
                 <Tabs.Screen
                     name="AISeek"
                     options={{
@@ -70,8 +67,6 @@ const TabLayout = () => {
                                 color={color}
                                 name="AI Seek"
                                 focused={focused}
-                                containerStyle="w-6 h-6"
-                                iconStyle="gap-2"
                             />
                         ),
                     }}

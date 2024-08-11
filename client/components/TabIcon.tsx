@@ -1,24 +1,46 @@
-import React from "react";
-import { View, Image, Text } from "react-native";
-export const TabIcon = ({icon,color,name,focused,containerStyle, iconStyle}: any) => {
-    
-    return (
-        <View className={`flex items-center justify-center ${iconStyle}`}>
-            <Image
-                source={icon}
-                resizeMode="contain"
-                tintColor={color}
-                className={`${containerStyle}`}
+import React, { useEffect } from "react";
+import { Image, View, Text } from "react-native";
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, withSpring } from "react-native-reanimated";
 
-            />
-            <Text
-                className={`${focused ? "font-poppins-semibold" : "font-poppins-regular"} text-xs`}
-                style={{ color: color }}
-            >
-                {name}
-            </Text>
+export const TabIcon = ({ icon, color, name, focused }) => {
+    const translateY = useSharedValue(focused ? 0 : -10);
+    const opacity = useSharedValue(focused ? 1 : 0);
+    const iconSize = useSharedValue(focused ? 32 : 28);
+
+    useEffect(() => {
+        // Use withTiming for smooth transitions
+        translateY.value = withTiming(focused ? -10 : 0, { duration: 300 }); 
+        opacity.value = withTiming(focused ? 0 : 1, { duration: 300 });
+        iconSize.value = withTiming(focused ? 32 : 28, { duration: 300 });
+    }, [focused]);
+
+    const animatedIconStyle = useAnimatedStyle(() => {
+        return {
+            transform: [{ translateY: translateY.value }],
+            width: iconSize.value,
+            height: iconSize.value,
+        };
+    });
+
+    const textStyle = useAnimatedStyle(() => {
+        return {
+            opacity: opacity.value,
+        };
+    });
+
+    return (
+        <View style={{ alignItems: "center", justifyContent: "center" }}>
+            <Animated.View style={{ alignItems: "center", justifyContent: "center" }}>
+                <Animated.Image
+                    source={icon}
+                    style={[animatedIconStyle, { tintColor: color }]}
+                />
+                {!focused && (
+                    <Animated.Text style={[{ color: color, fontSize: 10, marginTop: 4 }, textStyle]}>
+                        {name}
+                    </Animated.Text>
+                )}
+            </Animated.View>
         </View>
     );
 };
-
-

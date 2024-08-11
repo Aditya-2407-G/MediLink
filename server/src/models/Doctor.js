@@ -70,10 +70,10 @@ const doctorSchema = Schema(
         },
 
         //text embedded vector of doctor for search purpose
-        vector: {
-            type: [Number],
-            required: true,
-        },
+        // vector: {
+        //     type: [Number],
+        //     required: true,
+        // },
 
         licence: {
             type: String,

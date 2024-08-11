@@ -8,6 +8,7 @@ import {
     TouchableOpacity,
     Alert,
     BackHandler,
+    ActivityIndicator,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { Formik } from "formik";
@@ -30,42 +31,39 @@ interface Values {
     password: string;
 }
 
-
 const SignIn = () => {
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+    const [loading, setLoading] = useState(false);  // Add loading state
     const [location, setLocation] = useState(null);
-    
+
     const { login } = useAuth();
-    
+
     const togglePasswordVisibility = () => {
         setIsPasswordVisible(!isPasswordVisible);
     };
-    
+
     useEffect(() => {
         const GetLocationPermission = async () => {
             try {
-                
-                const { status } =
-                    await Location.getForegroundPermissionsAsync();
+                const { status } = await Location.getForegroundPermissionsAsync();
                 if (status !== "granted") {
-                    const { status } =
-                        await Location.requestForegroundPermissionsAsync();
-                        if (status !== "granted") {
-                            Alert.alert(
-                                "Location Permission Required",
-                                "Location access is necessary to find doctors near you. Please go to the app settings and allow location permission.",
-                                [
-                                    {
-                                        text: "OK",
-                                        onPress: () => BackHandler.exitApp(),
-                                    },
-                                    {
-                                        text: "Open Settings", 
-                                        onPress: () => openSettings()
-                                    }
-                                ]
-                            );
-                        }
+                    const { status } = await Location.requestForegroundPermissionsAsync();
+                    if (status !== "granted") {
+                        Alert.alert(
+                            "Location Permission Required",
+                            "Location access is necessary to find doctors near you. Please go to the app settings and allow location permission.",
+                            [
+                                {
+                                    text: "OK",
+                                    onPress: () => BackHandler.exitApp(),
+                                },
+                                {
+                                    text: "Open Settings",
+                                    onPress: () => openSettings(),
+                                },
+                            ]
+                        );
+                    }
                 }
             } catch (error) {
                 console.error("Error getting location:", error);
@@ -73,18 +71,19 @@ const SignIn = () => {
         };
         GetLocationPermission();
     }, []);
-    
-
 
     const handleSignIn = async (values: Values) => {
         try {
+            setLoading(true);  // Start loading
             const res = await login(values.email, values.password);
 
-            if (res.status == 200) {
+            if (res.status === 200) {
                 router.replace("/Home");
             }
         } catch (error) {
             console.log("Error signing in", error);
+        } finally {
+            setLoading(false);  // Stop loading
         }
     };
 
@@ -150,9 +149,7 @@ const SignIn = () => {
                                             className="flex-1 border border-blue-300 rounded-lg p-4 bg-blue-50 text-lg pr-12 font-poppins-regular"
                                             secureTextEntry={!isPasswordVisible}
                                             placeholder="••••••••"
-                                            onChangeText={handleChange(
-                                                "password"
-                                            )}
+                                            onChangeText={handleChange("password")}
                                             onBlur={handleBlur("password")}
                                             value={values.password}
                                         />
@@ -185,9 +182,10 @@ const SignIn = () => {
                                     handlePress={handleSubmit}
                                     containerStyles="w-full bg-blue-700 p-4 rounded-lg mt-6"
                                     textStyles="text-white text-center font-bold text-xl font-poppins-semibold"
-                                    isLoading={undefined}
+                                    isLoading={loading}  // Pass loading state to CustomButton
                                 />
-                                <View className="flex justify-center flex-row gap-2">
+
+                                <View className="flex justify-center flex-row gap-2 mt-6">
                                     <Text className="text-lg text-gray-700 font-poppins-regular">
                                         Don't have an account?
                                     </Text>

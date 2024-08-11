@@ -5,35 +5,121 @@ import { createAccessToken, createRefreshToken } from "../utils/token.js";
 import { Doctor } from "../models/Doctor.js";
 
 // function to generate text embeddings using hugging face inference API
-async function generateEmbeddings(text) {
-    console.log(JSON.stringify({ inputs: text }));
-    const response = await fetch(
-        "https://api-inference.huggingface.co/models/sentence-transformers/all-MiniLM-L6-v2",
-        {
-            method: "POST",
-            headers: {
-                Authorization: `Bearer ${process.env.HUGGINGFACE_API_TOKEN}`,
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                inputs: {
-                    source_sentence: text,
-                    sentences: [text],
-                },
-            }),
-        }
-    );
-    const data = await response.json();
-    console.log("RESPONSE: ", data);
+// async function generateEmbeddings(text) {
+//     console.log(JSON.stringify({ inputs: text }));
+//     const response = await fetch(
+//         "https://api-inference.huggingface.co/models/sentence-transformers/all-MiniLM-L6-v2",
+//         {
+//             method: "POST",
+//             headers: {
+//                 Authorization: `Bearer ${process.env.HUGGINGFACE_API_TOKEN}`,
+//                 "Content-Type": "application/json",
+//             },
+//             body: JSON.stringify({
+//                 inputs: {
+//                     source_sentence: text,
+//                     sentences: [text],
+//                 },
+//             }),
+//         }
+//     );
+//     const data = await response.json();
+//     console.log("RESPONSE: ", data);
 
-    if (!response.ok) {
-        throw new Error(`Error fetching embeddings: ${response.statusText}`);
-    }
+//     if (!response.ok) {
+//         throw new Error(`Error fetching embeddings: ${response.statusText}`);
+//     }
 
-    return data;
-}
+//     return data;
+// }
 
 // function to register user, both doctor and patient
+// export const register = async (req, res) => {
+//     try {
+//         const {
+//             name,
+//             email,
+//             password,
+//             role,
+//             hospitalName,
+//             hospitalAddress,
+//             specialization,
+//             fees,
+//             city,
+//             state,
+//             country,
+//             latitude,
+//             longitude,
+//             licence,
+//             experience,
+//         } = req.body;
+
+//         // return with status code 400 if any field is empty
+//         if ([name, email, password].some((field) => field?.trim() === "")) {
+//             return res.status(400).json({ message: "Please Fill All Fields" });
+//         }
+
+//         // check if email is already taken
+//         const existedUser = await User.findOne({ email });
+
+//         // if it exists, return with status code 400
+//         if (existedUser) {
+//             return res
+//                 .status(400)
+//                 .json({ message: "User with same email already exists" });
+//         }
+
+//         // hash password for security
+//         const hashedPassword = await bcrypt.hash(password, 10);
+//         const user = new User({
+//             name,
+//             email,
+//             password: hashedPassword,
+//             role,
+//         });
+
+//         // save user
+//         await user.save();
+
+//         // create a doctor if role selected is doctor
+//         if (role.toLowerCase() === "doctor") {
+//             const doctorText = `Doctor ${name} specializing in ${specialization} sits at ${hospitalName} ${hospitalAddress} ${city} ${state} ${country}`;
+//             // generate embeddings using the python script
+//             const vector = await generateEmbeddings(doctorText);
+
+//             const doctor = new Doctor({
+//                 user_id: user._id,
+//                 doctorName: name,
+//                 hospitalName,
+//                 hospitalAddress,
+//                 specialization,
+//                 fees,
+//                 city,
+//                 state,
+//                 country,
+//                 location: {
+//                     type: "Point",
+//                     coordinates: [parseFloat(longitude), parseFloat(latitude)], // [longitude, latitude]
+//                 },
+//                 vector,
+//                 licence,
+//                 experience: parseInt(experience),
+//             });
+
+//             // save the doctor
+//             await doctor.save();
+//             return res
+//                 .status(201)
+//                 .json({ message: "Doctor Registered Successfully" });
+//         }
+//         return res.status(201).json({ message: "User Created Successfully" });
+//     } catch (error) {
+//         console.log(error);
+//         return res.status(500).json({ message: "Error Creating User" });
+//     }
+// };
+
+// new code here 
 export const register = async (req, res) => {
     try {
         const {
@@ -83,9 +169,7 @@ export const register = async (req, res) => {
 
         // create a doctor if role selected is doctor
         if (role.toLowerCase() === "doctor") {
-            const doctorText = `Doctor ${name} specializing in ${specialization} sits at ${hospitalName} ${hospitalAddress} ${city} ${state} ${country}`;
-            // generate embeddings using the python script
-            const vector = await generateEmbeddings(doctorText);
+            const description = `Doctor ${name} specializing in ${specialization} sits at ${hospitalName} ${hospitalAddress} ${city} ${state} ${country}`;
 
             const doctor = new Doctor({
                 user_id: user._id,
@@ -101,7 +185,7 @@ export const register = async (req, res) => {
                     type: "Point",
                     coordinates: [parseFloat(longitude), parseFloat(latitude)], // [longitude, latitude]
                 },
-                vector,
+                description,
                 licence,
                 experience: parseInt(experience),
             });

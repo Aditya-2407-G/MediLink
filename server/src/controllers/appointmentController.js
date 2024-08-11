@@ -76,7 +76,6 @@ export const upcoming = async (req, res) => {
         })
             .populate({
                 path: "doctor_id",
-                select: "-vector", 
             })
             .sort({ appointmentDate: 1, timeSlot: 1 })
             .exec();

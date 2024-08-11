@@ -1,6 +1,6 @@
 import { Doctor } from "../models/Doctor.js";
 
-// function that finds doctor based on search results 
+// function that finds doctor based on search results
 export const findDoctor = async (req, res) => {
     try {
         const {
@@ -76,11 +76,6 @@ export const findDoctor = async (req, res) => {
                             ? sortOptions
                             : { _id: 1 },
                 },
-                {
-                    $project: {
-                        vector: 0, // Exclude the `vector` field
-                    },
-                },
             ]).exec();
         } else {
             doctors = await Doctor.find(finalQuery)
@@ -130,8 +125,111 @@ async function generateEmbeddings(text) {
     return data;
 }
 
-
 // function that handles vector search to give results of doctors based on search queries
+// export const aiSeek = async (req, res) => {
+//     try {
+//         const text = req.query.text;
+//         const userLat = req.query.latitude;
+//         const userLon = req.query.longitude;
+
+//         if (!text) {
+//             return res
+//                 .status(400)
+//                 .json({ error: "Text query parameter is required" });
+//         }
+
+//         const queryVector = await generateEmbeddings(text);
+//         if (!queryVector) {
+//             return res
+//                 .status(500)
+//                 .json({ error: "Failed to generate embeddings" });
+//         }
+
+//         // Step 1: Perform vector search
+//         const vectorSearchResults = await Doctor.aggregate([
+//             {
+//                 $vectorSearch: {
+//                     index: "vector_index",
+//                     path: "vector",
+//                     queryVector: queryVector,
+//                     numCandidates: 100,
+//                     limit: 3,
+//                 },
+//             },
+//             {
+//                 $addFields: {
+//                     score: { $meta: "vectorSearchScore" },
+//                 },
+//             },
+//             {
+//                 $project: {
+//                     vector: 0, // Exclude vector from results
+//                 },
+//             },
+//         ]).exec();
+
+//         // Extract the IDs of the doctors found in the vector search
+//         const doctorIds = vectorSearchResults.map((doc) => doc._id);
+
+//         // Step 2: Apply geospatial filtering on the candidates
+//         const geoFilteredResults = await Doctor.aggregate([
+//             {
+//                 $geoNear: {
+//                     near: {
+//                         type: "Point",
+//                         coordinates: [parseFloat(userLon), parseFloat(userLat)],
+//                     },
+//                     distanceField: "distance",
+//                     maxDistance: 50000000, // 50,000 km as default max distance
+//                     spherical: true,
+//                     query: { _id: { $in: doctorIds } }, // Filter by the IDs from the vector search
+//                 },
+//             },
+//             {
+//                 $addFields: {
+//                     distanceInKm: { $multiply: ["$distance", (0.001)] }, // Convert distance to kilometers
+//                 },
+//             },
+//             {
+//                 $project: {
+//                     distance: 1, // Include distance in the result
+//                     distanceInKm: 1, // Include distance in km
+//                     score: 1, // Include vector search score
+//                     doctorName: 1, // Include other necessary fields
+//                     hospitalName: 1,
+//                     hospitalAddress: 1,
+//                     specialization: 1,
+//                     fees: 1,
+//                     city: 1,
+//                     state: 1,
+//                     country: 1,
+//                     location: 1,
+//                     licence: 1,
+//                     experience: 1,
+//                     profilePhoto: 1,
+//                 },
+//             },
+//         ]).exec();
+
+//         // Combine the vector search results with geo-filtered results
+//         const finalResults = vectorSearchResults.map(result => {
+//             const geoResult = geoFilteredResults.find(geoRes => geoRes._id.equals(result._id));
+//             return {
+//                 ...result,
+//                 distance: geoResult?.distance,
+//                 distanceInKm: geoResult?.distanceInKm,
+//             };
+//         });
+
+//         // Return the final results
+//         return res.status(200).json(finalResults);
+//     } catch (error) {
+//         console.error(`Error in aiSeek: ${error}`);
+//         return res.status(500).json({ error: "Internal Server Error" });
+//     }
+// };
+
+//new code here
 export const aiSeek = async (req, res) => {
     try {
         const text = req.query.text;
@@ -144,40 +242,64 @@ export const aiSeek = async (req, res) => {
                 .json({ error: "Text query parameter is required" });
         }
 
-        const queryVector = await generateEmbeddings(text);
-        if (!queryVector) {
-            return res
-                .status(500)
-                .json({ error: "Failed to generate embeddings" });
+        // fetch all doctors
+        const doctors = await Doctor.find().exec(); // Fetch all doctors with their descriptions
+
+        // prepare sentences for API request
+        const sentences = doctors.flatMap((doctor) => doctor.description || `Doctor ${doctor.name} specializing in ${doctor.specialization} sits at ${doctor.hospitalName} ${doctor.hospitalAddress} ${doctor.city} ${doctor.state} ${doctor.country}`);
+
+        console.log(
+            "Input being passed is",
+            JSON.stringify({
+                inputs: {
+                    source_sentence: text,
+                    sentences: sentences,
+                },
+            })
+        );
+
+        // get similarity scores from Hugging Face API
+        const response = await fetch(
+            "https://api-inference.huggingface.co/models/sentence-transformers/all-MiniLM-L6-v2",
+            {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${process.env.HUGGINGFACE_API_TOKEN}`,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    inputs: {
+                        source_sentence: text,
+                        sentences: sentences,
+                    },
+                }),
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error(
+                `Error fetching similarity scores: ${response.statusText}`
+            );
         }
+        const scores= await response.json(); // Adjust based on the actual API response
+        console.log(scores);
 
-        // Step 1: Perform vector search
-        const vectorSearchResults = await Doctor.aggregate([
-            {
-                $vectorSearch: {
-                    index: "vector_index",
-                    path: "vector",
-                    queryVector: queryVector,
-                    numCandidates: 100,
-                    limit: 3,
-                },
-            },
-            {
-                $addFields: {
-                    score: { $meta: "vectorSearchScore" },
-                },
-            },
-            {
-                $project: {
-                    vector: 0, // Exclude vector from results
-                },
-            },
-        ]).exec();
+        // combine scores with doctor data
+        const doctorsWithScores = doctors.map((doctor, index) => ({
+            ...doctor.toObject(),
+            score: scores[index], // Attach the similarity score
+        }));
 
-        // Extract the IDs of the doctors found in the vector search
-        const doctorIds = vectorSearchResults.map((doc) => doc._id);
+        // sort doctors by similarity score in descending order
+        const sortedDoctors = doctorsWithScores.sort(
+            (a, b) => b.score - a.score
+        );
 
-        // Step 2: Apply geospatial filtering on the candidates
+        // apply geospatial filtering on top results
+        const topDoctorsIds = sortedDoctors.slice(0, 3).map((doc) => doc._id); // Limit to top 10 for geo-filtering
+
+        console.log(topDoctorsIds);
+
         const geoFilteredResults = await Doctor.aggregate([
             {
                 $geoNear: {
@@ -188,20 +310,20 @@ export const aiSeek = async (req, res) => {
                     distanceField: "distance",
                     maxDistance: 50000000, // 50,000 km as default max distance
                     spherical: true,
-                    query: { _id: { $in: doctorIds } }, // Filter by the IDs from the vector search
+                    query: { _id: { $in: topDoctorsIds } }, // Filter by the IDs from the top results
                 },
             },
             {
                 $addFields: {
-                    distanceInKm: { $multiply: ["$distance", (0.001)] }, // Convert distance to kilometers
+                    distanceInKm: { $multiply: ["$distance", 0.001] }, // Convert distance to kilometers
                 },
             },
             {
                 $project: {
-                    distance: 1, // Include distance in the result
-                    distanceInKm: 1, // Include distance in km
-                    score: 1, // Include vector search score
-                    doctorName: 1, // Include other necessary fields
+                    distance: 1, 
+                    distanceInKm: 1, 
+                    score: 1, 
+                    doctorName: 1, 
                     hospitalName: 1,
                     hospitalAddress: 1,
                     specialization: 1,
@@ -217,21 +339,10 @@ export const aiSeek = async (req, res) => {
             },
         ]).exec();
 
-        // Combine the vector search results with geo-filtered results
-        const finalResults = vectorSearchResults.map(result => {
-            const geoResult = geoFilteredResults.find(geoRes => geoRes._id.equals(result._id));
-            return {
-                ...result,
-                distance: geoResult?.distance,
-                distanceInKm: geoResult?.distanceInKm,
-            };
-        });
-
-        // Return the final results
-        return res.status(200).json(finalResults);
+        // return the final results with both score and geo data
+        return res.status(200).json(geoFilteredResults);
     } catch (error) {
         console.error(`Error in aiSeek: ${error}`);
         return res.status(500).json({ error: "Internal Server Error" });
     }
 };
-

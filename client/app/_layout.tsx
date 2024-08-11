@@ -5,6 +5,7 @@ import AuthProvider from "../context/AuthContext.js";
 
 
 export default function RootLayout() {
+  // import fonts as requirement
     const [fontLoaded, error] = useFonts({
         "Poppins-Black": require("../assets/fonts/Poppins-Black.ttf"),
         "Poppins-Bold": require("../assets/fonts/Poppins-Bold.ttf"),
@@ -19,7 +20,8 @@ export default function RootLayout() {
 
     useEffect(() => {
         if (error) throw error;
-    
+
+        // ensure fonts are loaded before displaying 
         if (fontLoaded) {
           SplashScreen.hideAsync();
         }

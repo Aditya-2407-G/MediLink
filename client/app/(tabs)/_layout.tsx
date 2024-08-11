@@ -1,14 +1,14 @@
 import { StatusBar } from "expo-status-bar";
-import { Redirect, Tabs } from "expo-router";
+import { Tabs } from "expo-router";
 import { icons } from "../../constants";
 import { TabIcon } from "../../components/TabIcon";
 
 const TabLayout = () => {
-
-    
-
+    // adding all the tabs
     return (
+        
         <>
+            
             <StatusBar backgroundColor="#161622" style="light" />
             <Tabs
                 screenOptions={{

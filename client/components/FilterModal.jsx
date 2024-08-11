@@ -123,7 +123,7 @@ export const FilterModal = ({
             <View className="flex-1 bg-[rgba(0,0,0,0.5)] justify-end">
                 <View className="bg-white rounded-t-2xl pt-6 pb-12 px-6">
                     <View className="flex-row justify-between items-center mb-6">
-                        <Text className="text-2xl font-poppins-semibold">
+                        <Text className="text-2xl font-poppins-semibold text-blue-600">
                             Filters
                         </Text>
                         <TouchableOpacity
@@ -165,7 +165,7 @@ export const FilterModal = ({
                                                 handleRemoveFilter("fees")
                                             }
                                         >
-                                            <Text className="text-red-500 text-base mt-2">
+                                            <Text className="text-red-500 text-base mt-2 font-poppins-regular">
                                                 Remove Fees Filter
                                             </Text>
                                         </TouchableOpacity>
@@ -210,7 +210,7 @@ export const FilterModal = ({
                                                     )
                                                 }
                                             >
-                                                <Text className="text-red-500 text-base mt-2">
+                                                <Text className="text-red-500 text-base mt-2 font-poppins-regular">
                                                     Remove Distance Filter
                                                 </Text>
                                             </TouchableOpacity>
@@ -251,7 +251,7 @@ export const FilterModal = ({
                                                 handleRemoveFilter("experience")
                                             }
                                         >
-                                            <Text className="text-red-500 text-base mt-2">
+                                            <Text className="text-red-500 text-base mt-2 font-poppins-regular">
                                                 Remove Experience Filter
                                             </Text>
                                         </TouchableOpacity>
@@ -376,7 +376,7 @@ export const FilterModal = ({
                                                 handleRemoveFilter("sortBy")
                                             }
                                         >
-                                            <Text className="text-red-500 text-base mt-2">
+                                            <Text className="text-red-500 text-base mt-2 font-poppins-regular">
                                                 Remove Sort Filter
                                             </Text>
                                         </TouchableOpacity>

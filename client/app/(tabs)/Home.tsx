@@ -1,15 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import {
-    View,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    FlatList,
-    SafeAreaView,
-    RefreshControl,
-    ActivityIndicator,
-    Alert,
-} from "react-native";
+import { View, Text, TextInput, TouchableOpacity, FlatList, SafeAreaView, RefreshControl, ActivityIndicator, Alert, BackHandler } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
 import { debounce } from "lodash";
@@ -18,8 +8,10 @@ import { FilterModal } from "../../components/FilterModal";
 import { DoctorCard } from "@/components/DoctorCard";
 import * as Location from "expo-location";
 import { useAuth } from "@/context/AuthContext";
+import {openSettings} from "expo-linking";
 
 const Home = () => {
+
     const [doctors, setDoctors] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
@@ -30,22 +22,37 @@ const Home = () => {
 
     const { logout } = useAuth();
 
+    // fetch initial doctor information on home page based on distance, nearest doctor to the farthest.
     const getLocationAndFetchData = async () => {
+
         try {
             setLoading(true);
+            // ask for location permissions, if not already granted
             const { status } = await Location.getForegroundPermissionsAsync();
             if (status !== "granted") {
                 const { status } =
                     await Location.requestForegroundPermissionsAsync();
-                if (status !== "granted") {
-                    console.log("Permission not granted");
-                    return;
-                }
+                    if (status !== "granted") {
+                        Alert.alert(
+                            "Location Permission Required",
+                            "Location access is necessary to find doctors near you. Please go to the app settings and allow location permission.",
+                            [
+                                {
+                                    text: "OK",
+                                    onPress: () => BackHandler.exitApp(),
+                                },
+                                {
+                                    text: "Open Settings", 
+                                    onPress: () => openSettings()
+                                }
+                            ]
+                        );
+                    }
             }
-
             const { coords } = await Location.getCurrentPositionAsync({});
             const { latitude, longitude } = coords;
 
+            // update coordinates in the filtes
             const updatedFilters = {
                 ...filters,
                 userLat: latitude,
@@ -53,6 +60,7 @@ const Home = () => {
             };
             setFilters(updatedFilters);
 
+            // call an api to the server, to get some doctors on inital render. Pass location and other filters as params
             const response = await axios.get(
                 `${process.env.EXPO_PUBLIC_API_URL}/doctor/search`,
                 {
@@ -71,10 +79,12 @@ const Home = () => {
         }
     };
 
+    // call the function as soon as the component mounts
     useEffect(() => {
         getLocationAndFetchData();
     }, []);
 
+    // debounced fetch doctors, to ensure the server is not being called in every few seconds for small iterations
     const debouncedFetchDoctors = useCallback(
         debounce(async (query, currentFilters) => {
             if (showFilterModal) return;
@@ -99,6 +109,7 @@ const Home = () => {
         []
     );
 
+    // call debouncedFetchDoctors function if filter is applied or search query exists
     useEffect(() => {
         if (searchQuery || isFilterApplied) {
             debouncedFetchDoctors(searchQuery, filters);
@@ -106,10 +117,12 @@ const Home = () => {
         }
     }, [searchQuery, filters, isFilterApplied, debouncedFetchDoctors]);
 
+    // function to handle search query 
     const handleSearch = (text) => {
         setSearchQuery(text);
     };
 
+    // function to handle filters
     const handleApplyFilters = (newFilters) => {
         setFilters((prevFilters) => ({
             ...prevFilters,
@@ -118,11 +131,14 @@ const Home = () => {
         debouncedFetchDoctors(searchQuery, { ...filters, ...newFilters });
     };
 
+    // function to refresh screen 
     const onRefresh = useCallback(() => {
         setRefreshing(true);
+        setSearchQuery("")
         getLocationAndFetchData().then(() => setRefreshing(false));
     }, []);
 
+    // function to handle logout
     const handleLogout = async () => {
         try {
             const res = await logout();
@@ -156,7 +172,7 @@ const Home = () => {
                         className="bg-blue-500 p-2 rounded-full -mr-2 -mt-1"
                         onPress={handleLogout}
                     >
-                        <Ionicons name="power" size={24} color="white" />
+                        <Ionicons name="log-out" size={24} color="white" />
                     </TouchableOpacity>
                 </View>
             </View>

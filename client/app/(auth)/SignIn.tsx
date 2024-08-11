@@ -6,14 +6,17 @@ import {
     TextInput,
     Image,
     TouchableOpacity,
+    Alert,
+    BackHandler,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Formik } from "formik";
 import CustomButton from "@/components/CustomButton";
 import * as Yup from "yup";
 import { Link, router } from "expo-router";
 import { useAuth } from "@/context/AuthContext";
-import * as SecureStorage from "expo-secure-store";
+import * as Location from "expo-location";
+import { openSettings } from "expo-linking";
 
 const formSchema = Yup.object().shape({
     email: Yup.string().email().required("Email is required"),
@@ -27,13 +30,51 @@ interface Values {
     password: string;
 }
 
+
 const SignIn = () => {
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+    const [location, setLocation] = useState(null);
+    
     const { login } = useAuth();
-
+    
     const togglePasswordVisibility = () => {
         setIsPasswordVisible(!isPasswordVisible);
     };
+    
+    useEffect(() => {
+        const GetLocationPermission = async () => {
+            try {
+                
+                const { status } =
+                    await Location.getForegroundPermissionsAsync();
+                if (status !== "granted") {
+                    const { status } =
+                        await Location.requestForegroundPermissionsAsync();
+                        if (status !== "granted") {
+                            Alert.alert(
+                                "Location Permission Required",
+                                "Location access is necessary to find doctors near you. Please go to the app settings and allow location permission.",
+                                [
+                                    {
+                                        text: "OK",
+                                        onPress: () => BackHandler.exitApp(),
+                                    },
+                                    {
+                                        text: "Open Settings", 
+                                        onPress: () => openSettings()
+                                    }
+                                ]
+                            );
+                        }
+                }
+            } catch (error) {
+                console.error("Error getting location:", error);
+            }
+        };
+        GetLocationPermission();
+    }, []);
+    
+
 
     const handleSignIn = async (values: Values) => {
         try {

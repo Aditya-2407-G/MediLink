@@ -3,12 +3,13 @@ import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import axios from "axios";
 import { AppointmentCard } from "@/components/AppointmentCard";
-import { Ionicons } from '@expo/vector-icons'; // Make sure to install this package
+import { Ionicons } from "@expo/vector-icons";
 
 const Appointments = () => {
     const [appointments, setAppointments] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    // function to fetch all user appointments, sorted in earlist to latest
     const fetchAppointments = async () => {
         setLoading(true);
         try {
@@ -22,14 +23,20 @@ const Appointments = () => {
         setLoading(false);
     };
 
+    // fetch appointments on component mount
     useEffect(() => {
         fetchAppointments();
     }, []);
 
     const renderHeader = () => (
         <View className="flex-row justify-between items-center mb-4">
-            <Text className="text-2xl font-poppins-bold text-blue-600">Appointments</Text>
-            <TouchableOpacity onPress={fetchAppointments}>
+            <Text className="text-2xl font-poppins-bold text-blue-700">
+                Appointments
+            </Text>
+            <TouchableOpacity
+                onPress={fetchAppointments}
+                className="bg-neutral-100 p-1.5 rounded-full"
+            >
                 <Ionicons name="refresh" size={24} color="blue" />
             </TouchableOpacity>
         </View>
@@ -41,21 +48,24 @@ const Appointments = () => {
                 {renderHeader()}
                 {!loading ? (
                     <FlatList
-    data={appointments}
-    renderItem={(itemData) => (
-        <AppointmentCard
-            appointment={itemData}
-            fetchAppointments={fetchAppointments}
-        />
-    )}
-    keyExtractor={(item) => item._id.toString()}
-    showsVerticalScrollIndicator={false}
-    ListEmptyComponent={() => (
-        <Text>No appointments found</Text>
-    )}
-/>
+                        data={appointments}
+                        renderItem={(itemData) => (
+                            <AppointmentCard
+                                appointment={itemData}
+                                fetchAppointments={fetchAppointments}
+                            />
+                        )}
+                        keyExtractor={(item) => item._id.toString()}
+                        showsVerticalScrollIndicator={false}
+                        contentContainerStyle={{ paddingBottom: 80 }}
+                        ListEmptyComponent={() => (
+                            <Text>No appointments found</Text>
+                        )}
+                    />
                 ) : (
-                    <Text className="text-base font-poppins-regular text-neutral-600">Fetching appointments..</Text>
+                    <Text className="text-base font-poppins-regular text-neutral-600">
+                        Fetching appointments..
+                    </Text>
                 )}
             </View>
         </SafeAreaView>

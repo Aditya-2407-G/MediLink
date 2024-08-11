@@ -9,6 +9,7 @@ import {
     KeyboardAvoidingView,
     Platform,
     Image,
+    BackHandler
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import { Formik } from "formik";
@@ -18,6 +19,7 @@ import { Link } from "expo-router";
 import { useAuth } from "@/context/AuthContext";
 import { Ionicons, FontAwesome6 } from "@expo/vector-icons";
 import * as Location from "expo-location";
+import { openSettings } from "expo-linking";
 
 const formSchema = Yup.object().shape({
     name: Yup.string().required("Name is required"),
@@ -131,16 +133,28 @@ const SignUp = () => {
     useEffect(() => {
         const GetLocationPermission = async () => {
             try {
-                // Check if location permission is granted
+                
                 const { status } =
                     await Location.getForegroundPermissionsAsync();
                 if (status !== "granted") {
                     const { status } =
                         await Location.requestForegroundPermissionsAsync();
-                    if (status !== "granted") {
-                        console.log("Permission not granted");
-                        return;
-                    }
+                        if (status !== "granted") {
+                            Alert.alert(
+                                "Location Permission Required",
+                                "Location access is necessary to find doctors near you. Please go to the app settings and allow location permission.",
+                                [
+                                    {
+                                        text: "OK",
+                                        onPress: () => BackHandler.exitApp(),
+                                    },
+                                    {
+                                        text: "Open Settings", 
+                                        onPress: () => openSettings()
+                                    }
+                                ]
+                            );
+                        }
                 }
             } catch (error) {
                 console.error("Error getting location:", error);

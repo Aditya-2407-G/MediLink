@@ -141,16 +141,18 @@ async function generateEmbeddings(text) {
     }
 }
 
+
 export const aiSeek = async (req, res) => {
-    console.log("seek called in backend");
     try {
-        const text = req.query.text; 
+        const text = req.query.text;
+        const userLat = req.query.latitude;
+        const userLon = req.query.longitude;
+
         if (!text) {
             return res
                 .status(400)
                 .json({ error: "Text query parameter is required" });
         }
-
 
         const queryVector = await generateEmbeddings(text);
         if (!queryVector) {
@@ -159,14 +161,15 @@ export const aiSeek = async (req, res) => {
                 .json({ error: "Failed to generate embeddings" });
         }
 
-        const pipeline = [
+        // Step 1: Perform vector search
+        const vectorSearchResults = await Doctor.aggregate([
             {
                 $vectorSearch: {
                     index: "vector_index",
                     path: "vector",
                     queryVector: queryVector,
-                    numCandidates: 100, 
-                    limit: 5, 
+                    numCandidates: 100,
+                    limit: 3,
                 },
             },
             {
@@ -176,17 +179,69 @@ export const aiSeek = async (req, res) => {
             },
             {
                 $project: {
-                    vector: 0,
+                    vector: 0, // Exclude vector from results
                 },
             },
-        ];
+        ]).exec();
 
-        // Perform the aggregation
-        const results = await Doctor.aggregate(pipeline).exec();
-        console.log(results);
-        return res.status(200).json(results);
+        // Extract the IDs of the doctors found in the vector search
+        const doctorIds = vectorSearchResults.map((doc) => doc._id);
+
+        // Step 2: Apply geospatial filtering on the candidates
+        const geoFilteredResults = await Doctor.aggregate([
+            {
+                $geoNear: {
+                    near: {
+                        type: "Point",
+                        coordinates: [parseFloat(userLon), parseFloat(userLat)],
+                    },
+                    distanceField: "distance",
+                    maxDistance: 50000000, // 50,000 km as default max distance
+                    spherical: true,
+                    query: { _id: { $in: doctorIds } }, // Filter by the IDs from the vector search
+                },
+            },
+            {
+                $addFields: {
+                    distanceInKm: { $multiply: ["$distance", (0.001)] }, // Convert distance to kilometers
+                },
+            },
+            {
+                $project: {
+                    distance: 1, // Include distance in the result
+                    distanceInKm: 1, // Include distance in km
+                    score: 1, // Include vector search score
+                    doctorName: 1, // Include other necessary fields
+                    hospitalName: 1,
+                    hospitalAddress: 1,
+                    specialization: 1,
+                    fees: 1,
+                    city: 1,
+                    state: 1,
+                    country: 1,
+                    location: 1,
+                    licence: 1,
+                    experience: 1,
+                    profilePhoto: 1,
+                },
+            },
+        ]).exec();
+
+        // Combine the vector search results with geo-filtered results
+        const finalResults = vectorSearchResults.map(result => {
+            const geoResult = geoFilteredResults.find(geoRes => geoRes._id.equals(result._id));
+            return {
+                ...result,
+                distance: geoResult?.distance,
+                distanceInKm: geoResult?.distanceInKm,
+            };
+        });
+
+        // Return the final results
+        return res.status(200).json(finalResults);
     } catch (error) {
         console.error(`Error in aiSeek: ${error}`);
         return res.status(500).json({ error: "Internal Server Error" });
     }
 };
+

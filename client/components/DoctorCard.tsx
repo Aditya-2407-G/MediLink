@@ -37,7 +37,7 @@ export const DoctorCard = ({ doctor, onPress }) => {
                 <View className="flex-row items-start">
                     <Ionicons name="location" size={16} style={{padding:1.5}} color="#3B82F6" />
 
-                    <Text className="text-blue-600 font-poppins-semibold">
+                    <Text className="text-blue-600 font-poppins-semibold text-base">
                         {doctor.distanceInKm ? `${doctor.distanceInKm.toFixed(2)} km` : "N/A"} 
                     </Text>
                 </View>

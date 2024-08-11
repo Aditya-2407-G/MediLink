@@ -58,8 +58,7 @@ export const AppointmentCard = ({ appointment: { item }, fetchAppointments }) =>
 
     const cancelAppointment = async () => {
         try {
-            console.log(item)
-            console.log("inside cancel appointment")
+
             const response = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/appointment/cancel`, {
                 params: {
                     appointmentId: item._id

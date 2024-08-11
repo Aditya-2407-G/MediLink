@@ -28,6 +28,7 @@ const AppointmentBooking = () => {
     const [slotsFetched, setSlotsFetched] = useState<boolean>(false);
     const [calendarId, setCalendarId] = useState<string | null>(null);
 
+    // request calender permisions to proceed with appointment booking
     useEffect(() => {
         (async () => {
             const { status } =
@@ -61,6 +62,7 @@ const AppointmentBooking = () => {
         })();
     }, []);
 
+    // create the calender
     const createCalendar = async () => {
         const defaultCalendarSource =
             Platform.OS === "ios"
@@ -87,6 +89,7 @@ const AppointmentBooking = () => {
         return defaultCalendar.source;
     };
 
+    // function that finds all slots for that particular doctor on that particular date, this ensures that we do not show slots that have already been booked.
     const fetchBookedSlots = useCallback(async () => {
         try {
             const response = await axios.get(
@@ -110,6 +113,7 @@ const AppointmentBooking = () => {
         }
     }, [selectedDate, parsedDoctor._id]);
 
+    // call the fetchBookedSlots function everytime the date is changed
     useEffect(() => {
         if (selectedDate) {
             setLoading(true);
@@ -118,6 +122,8 @@ const AppointmentBooking = () => {
         }
     }, [selectedDate, fetchBookedSlots]);
 
+    // function that generates slots for a particular date, by default we provide slots from 9 to 12, and 3 to 5.
+    // this function ensures we do not show the booked slots to users
     const generateSlots = () => {
         const slots = [];
         const timeRanges = [
@@ -161,6 +167,7 @@ const AppointmentBooking = () => {
         return slots;
     };
 
+    // function that handles the appointment booking process
     const bookAppointment = async (slot: string) => {
         if (!calendarId) {
             Alert.alert("Error", "Calendar not available");
@@ -232,6 +239,7 @@ const AppointmentBooking = () => {
         }
     };
 
+    // request for push notificaitons, so that users can be notified 1 hour before the appointment time
     async function registerForPushNotificationsAsync() {
         let token;
 
@@ -263,6 +271,7 @@ const AppointmentBooking = () => {
         return token;
     }
 
+    // function to schedule the notification for 1 hour prior to appointment time
     async function scheduleAppointmentNotification(appointmentDate, doctorName, latitude, longitude) {
         const notificationDate = new Date(appointmentDate);
         notificationDate.setHours(notificationDate.getHours() - 1); // 1 hour before appointment
@@ -280,6 +289,7 @@ const AppointmentBooking = () => {
             trigger: notificationDate,
         });
     }
+    
     function setNotificationHandler() {
         Notifications.setNotificationHandler({
             handleNotification: async () => ({
@@ -320,6 +330,7 @@ const AppointmentBooking = () => {
 
                 <View className="mb-4">
                     <RNCalendar
+                    className="rounded-lg font-poppins-regular"
                         current={new Date().toISOString().split("T")[0]}
                         minDate={
                             new Date(
@@ -343,7 +354,7 @@ const AppointmentBooking = () => {
                         markedDates={{
                             [selectedDate]: {
                                 selected: true,
-                                selectedColor: "blue",
+                                selectedColor: "#2563eb",
                             },
                         }}
                     />
@@ -351,11 +362,11 @@ const AppointmentBooking = () => {
 
                 {selectedDate && (
                     <View>
-                        <Text className="text-xl font-poppins-bold text-blue-700 mb-2">
+                        <Text className="text-xl font-poppins-bold text-blue-800 mb-2">
                             Available Slots:
                         </Text>
                         {loading ? (
-                            <Text className="text-blue-600 text-start text-lg font-poppins-regular">
+                            <Text className="text-gray-600 text-start text-lg font-poppins-regular">
                                 Loading...
                             </Text>
                         ) : slotsFetched ? (
@@ -364,19 +375,19 @@ const AppointmentBooking = () => {
                                     {generateSlots().map((slot, index) => (
                                         <TouchableOpacity
                                             key={index}
-                                            className="bg-white p-2 rounded w-40"
+                                            className="bg-blue-600 p-2 rounded w-40"
                                             onPress={() =>
                                                 bookAppointment(slot)
                                             }
                                         >
-                                            <Text className="text-blue-700 text-center text-base font-poppins-medium">
+                                            <Text className=" text-white text-center text-base font-poppins-medium">
                                                 {slot}
                                             </Text>
                                         </TouchableOpacity>
                                     ))}
                                 </View>
                             ) : (
-                                <Text className="text-blue-600 text-center">
+                                <Text className="text-blue-700 text-center">
                                     No slots available
                                 </Text>
                             )
@@ -385,7 +396,7 @@ const AppointmentBooking = () => {
                 )}
 
                 {!selectedDate && (
-                    <Text className="text-blue-600 text-center">
+                    <Text className="text-blue-700 text-center text-base font-poppins-regular">
                         Please select a date to view available slots.
                     </Text>
                 )}

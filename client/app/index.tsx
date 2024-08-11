@@ -11,6 +11,7 @@ export default function Index() {
     const { authenticated, checkAuthStatus } = useAuth();
 
     useEffect(() => {
+        // check if oboarding has been done already or not
         const initialize = async () => {
             await checkAuthStatus();  
             const value = await SecureStore.getItemAsync("onboardingShown");
@@ -30,15 +31,18 @@ export default function Index() {
             </SafeAreaView>
         );
     }
-
+    
+    // if user found, redirect to home page
     if (authenticated) {
         return <Redirect href="/Home" />;
     }
 
+    // if onboarding not done, show onboarding screen
     if (!onboardingDone) {
         return <OnboardingScreens />;
     }
-
+    
+    // otherwise redirect to sign in page
     return <Redirect href="/SignIn" />;
 }
 

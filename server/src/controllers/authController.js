@@ -34,7 +34,6 @@ async function generateEmbeddings(text) {
 }
 
 export const register = async (req, res) => {
-    console.log("Register function called");
     try {
         const {
             name,
@@ -77,11 +76,9 @@ export const register = async (req, res) => {
         await user.save();
 
         if (role.toLowerCase() === "doctor") {
-            console.log("We are adding doctor");
             const doctorText = `Doctor ${name}, specializing in ${specialization} sits at ${hospitalName}, ${hospitalAddress}, ${city}, ${state}, ${country}`;
             // Generate embeddings using the Python script
             const vector = await generateEmbeddings(doctorText);
-            console.log("Doctor created with vector");
 
             const doctor = new Doctor({
                 user_id: user._id,
@@ -101,7 +98,7 @@ export const register = async (req, res) => {
                 licence,
                 experience: parseInt(experience),
             });
-            console.log("DOCTOR IS: ", doctor);
+
             await doctor.save();
             return res
                 .status(201)
@@ -116,7 +113,6 @@ export const register = async (req, res) => {
 };
 
 export const login = async (req, res) => {
-    console.log("Sign in called");
     try {
         const { email, password } = req.body;
 
@@ -139,7 +135,7 @@ export const login = async (req, res) => {
         let userObj = user.toObject(); // Convert user document to plain object
 
         if (userObj.role.toLowerCase() === "doctor") {
-            console.log("User is a doctor");
+
             const doctor = await Doctor.findOne({ user_id: userObj._id });
 
             if (doctor) {

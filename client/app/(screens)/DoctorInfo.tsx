@@ -18,12 +18,14 @@ const DoctorInfo = () => {
     let { doctor }: any = route.params;
     doctor = JSON.parse(doctor);
 
+    // function that provides google maps link to the doctors chamber
     const openMapsWithDirections = () => {
         const doctorLat = doctor.location.coordinates[1];
         const doctorLon = doctor.location.coordinates[0];
         const url = `https://www.google.com/maps/dir/?api=1&destination=${doctorLat},${doctorLon}`;
         Linking.openURL(url);
     };
+    
     const handleBookAppointment = () => {
         // @ts-ignore
         navigation.navigate("AppointmentBooking", {

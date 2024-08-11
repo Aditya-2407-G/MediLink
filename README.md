@@ -123,7 +123,7 @@ This project is developed as part of the Veersa Technologies Hackathon competiti
 
 <table>
   <tr>
-    <td><img src="https://res.cloudinary.com/dddnk0dcn/image/upload/v1723396777/WhatsApp_Image_2024-08-11_at_22.43.45_302fc65a_d61f5o.jpg" alt="AI seek Page" width="200"/></td>
+<td><img src="https://res.cloudinary.com/dddnk0dcn/image/upload/v1723394906/WhatsApp_Image_2024-08-11_at_22.16.00_7ed9b1b5_vlp5xe.jpg" alt="AI seek Page" width="200"/></td>
   </tr>
   <tr>
     <td>AI seek Page</td>
@@ -158,7 +158,7 @@ This project is developed as part of the Veersa Technologies Hackathon competiti
 
 <table>
   <tr>
-    <td><img src="https://res.cloudinary.com/dddnk0dcn/image/upload/v1723396777/WhatsApp_Image_2024-08-11_at_22.43.45_302fc65a_d61f5o.jpg " alt="Testing Image 3" width="200"/></td>
+    <td><img src="https://res.cloudinary.com/dddnk0dcn/image/upload/v1723396777/WhatsApp_Image_2024-08-11_at_22.43.45_302fc65a_d61f5o.jpg" alt="Testing Image 3" width="200"/></td>
     <td><img src="https://res.cloudinary.com/dddnk0dcn/image/upload/v1723396568/WhatsApp_Image_2024-08-11_at_22.43.45_4d35ebaa_poj6o1.jpg" alt="Testing Image 4" width="200"/></td>
   </tr>
   <tr>

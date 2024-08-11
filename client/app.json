@@ -4,7 +4,7 @@
     "slug": "medilink",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/heartbeat.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "splash": {
@@ -13,7 +13,10 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "runtimeVersion": {
+        "policy": "appVersion"
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -23,8 +26,11 @@
       "package": "com.aditya2407.MediLink",
       "permissions": [
         "android.permission.ACCESS_COARSE_LOCATION",
-        "android.permission.ACCESS_FINE_LOCATION"
-      ]
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.READ_CALENDAR",
+        "android.permission.WRITE_CALENDAR"
+      ],
+      "runtimeVersion": "1.0.0"
     },
     "web": {
       "bundler": "metro",
@@ -56,12 +62,15 @@
     },
     "extra": {
       "router": {
-        "origin": false 
+        "origin": false
       },
       "eas": {
         "projectId": "e4bb9f3b-6008-404a-9f27-6f51f98e7674"
       }
     },
-    "owner": "aditya2407"
+    "owner": "aditya2407",
+    "updates": {
+      "url": "https://u.expo.dev/e4bb9f3b-6008-404a-9f27-6f51f98e7674"
+    }
   }
 }

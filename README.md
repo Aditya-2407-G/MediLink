@@ -1,7 +1,17 @@
-
+  
 # MediLink
 
 MediLink is a real-time application that allows users to view doctors in their vicinity and book appointments with specialists from the convenience of their homes. The app provides users with a highly intuitive experience, making the appointment process as seamless as possible.
+
+
+**Figma:** - https://www.figma.com/design/27CFrLnvMLducPEU7TgqD4/Mobile-Design?node-id=0-1&t=j98vfZDnc0CHhaLq-1 
+
+
+**APK:** - https://drive.google.com/file/d/1YCcOIzjauilcGymZvrAq3rs5nFouSCp5/view?usp=sharing
+
+
+*(The server takes 1 to 2 minutes to load on inital request so, it might take a while to process your first request.)*
+
 
 Key Features:
 
@@ -21,7 +31,12 @@ This project is developed as part of the Veersa Technologies Hackathon competiti
 
 ## Demo
 
-https://res.cloudinary.com/dddnk0dcn/video/upload/v1723397223/WhatsApp_Video_2024-08-11_at_22.56.29_bcf80560_yxcztd.mp4 
+
+<a href="https://res.cloudinary.com/dddnk0dcn/video/upload/v1723397223/WhatsApp_Video_2024-08-11_at_22.56.29_bcf80560_yxcztd.mp4" target="_blank">
+  <img src="https://res.cloudinary.com/dddnk0dcn/image/upload/v1723394889/WhatsApp_Image_2024-08-11_at_22.15.53_f48e21c6_cnelsg.jpg" alt="Watch the video" width="200"/>
+</a>
+
+
 ## Tech Stack
 
 **Client:** React-Native, Expo, TailwindCSS

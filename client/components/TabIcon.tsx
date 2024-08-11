@@ -5,13 +5,13 @@ import Animated, { useSharedValue, useAnimatedStyle, withTiming, withSpring } fr
 export const TabIcon = ({ icon, color, name, focused }) => {
     const translateY = useSharedValue(focused ? 0 : -10);
     const opacity = useSharedValue(focused ? 1 : 0);
-    const iconSize = useSharedValue(focused ? 32 : 28);
+    const iconSize = useSharedValue(focused ? 34 : 28);
 
     useEffect(() => {
         // Use withTiming for smooth transitions
-        translateY.value = withTiming(focused ? -10 : 0, { duration: 300 }); 
+        translateY.value = withTiming(focused ? -1: 0, { duration: 300 }); 
         opacity.value = withTiming(focused ? 0 : 1, { duration: 300 });
-        iconSize.value = withTiming(focused ? 32 : 28, { duration: 300 });
+        iconSize.value = withTiming(focused ? 34 : 28, { duration: 300 });
     }, [focused]);
 
     const animatedIconStyle = useAnimatedStyle(() => {

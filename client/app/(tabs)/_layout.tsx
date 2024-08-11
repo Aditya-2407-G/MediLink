@@ -16,7 +16,7 @@ const TabLayout = () => {
                         height: 70,
                         borderRadius: 35, 
                         position: "absolute",
-                        bottom: 20,
+                        bottom:20,
                         left: 20,
                         right: 20,
                         shadowColor: "#000", 

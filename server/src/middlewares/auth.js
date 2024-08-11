@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 
+// middleware to check for authenticated user
 export const auth = (req, res, next) => {
     try {
         const token = req.header("Authorization")?.replace("Bearer ", "");

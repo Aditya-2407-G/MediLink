@@ -11,14 +11,18 @@ export default function Index() {
     const { authenticated, checkAuthStatus } = useAuth();
 
     useEffect(() => {
-        // check if oboarding has been done already or not
         const initialize = async () => {
-            await checkAuthStatus();  
-            const value = await SecureStore.getItemAsync("onboardingShown");
-            setOnboardingDone(value === 'true');
-            setLoading(false);
+            try {
+                await checkAuthStatus();  
+                const value = await SecureStore.getItemAsync("onboardingShown");
+                setOnboardingDone(value === 'true');
+            } catch (error) {
+                setOnboardingDone(false); 
+            } finally {
+                setLoading(false);
+            }
         };
-
+    
         initialize();
     }, []);
 

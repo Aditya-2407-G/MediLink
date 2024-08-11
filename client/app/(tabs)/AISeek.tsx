@@ -138,6 +138,9 @@ const AISeek = () => {
                         <Text className="text-base font-poppins-regular text-neutral-600">
                             Looking for doctors...
                         </Text>
+                        <Text className="text-base font-poppins-regular text-neutral-600 italic">
+                            (This might take a few seconds)
+                        </Text>
                     </View>
                 )}
             </View>

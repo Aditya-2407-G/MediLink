@@ -218,7 +218,7 @@ const Home = () => {
                         )}
                         keyExtractor={(item) => item._id}
                         showsVerticalScrollIndicator={false}
-                        contentContainerStyle={{ paddingBottom: 100 }}
+                        contentContainerStyle={{ paddingBottom: 290 }}
                         refreshControl={
                             <RefreshControl
                                 refreshing={refreshing}

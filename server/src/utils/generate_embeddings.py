@@ -1,11 +1,13 @@
+# Python script for vectorizing text (Text Embedder)
+
 from sentence_transformers import SentenceTransformer
 import sys
 import json
 import warnings
 
-# Suppress the specific FutureWarning from transformers
 warnings.filterwarnings("ignore", category=FutureWarning, module="transformers.tokenization_utils_base")
 
+# python function to generate text embeddings using hugging face sentence transformer model 
 def generate_embeddings(text):
     model = SentenceTransformer('all-MiniLM-L6-v2') 
     embedding = model.encode(text).tolist()

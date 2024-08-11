@@ -8,6 +8,7 @@ import util from "util";
 
 const execPromise = util.promisify(exec);
 
+// function that runs a python script that converts doctor description into a vector space, that fascilitates vector search
 async function generateEmbeddings(text) {
     try {
         const env = { ...process.env, HF_HUB_DISABLE_SYMLINKS_WARNING: "1" };
@@ -33,6 +34,7 @@ async function generateEmbeddings(text) {
     }
 }
 
+// function to register user, both doctor and patient 
 export const register = async (req, res) => {
     try {
         const {
@@ -53,18 +55,22 @@ export const register = async (req, res) => {
             experience,
         } = req.body;
 
+        // return with status code 400 if any field is empty 
         if ([name, email, password].some((field) => field?.trim() === "")) {
             return res.status(400).json({ message: "Please Fill All Fields" });
         }
 
+        // check if email is already taken 
         const existedUser = await User.findOne({ email });
 
+        // if it exists, return with status code 400
         if (existedUser) {
             return res
                 .status(400)
                 .json({ message: "User with same email already exists" });
         }
 
+        // hash password for security
         const hashedPassword = await bcrypt.hash(password, 10);
         const user = new User({
             name,
@@ -73,11 +79,13 @@ export const register = async (req, res) => {
             role,
         });
 
+        // save user 
         await user.save();
 
+        // create a doctor if role selected is doctor 
         if (role.toLowerCase() === "doctor") {
             const doctorText = `Doctor ${name}, specializing in ${specialization} sits at ${hospitalName}, ${hospitalAddress}, ${city}, ${state}, ${country}`;
-            // Generate embeddings using the Python script
+            // generate embeddings using the python script
             const vector = await generateEmbeddings(doctorText);
 
             const doctor = new Doctor({
@@ -99,12 +107,12 @@ export const register = async (req, res) => {
                 experience: parseInt(experience),
             });
 
+            // save the doctor 
             await doctor.save();
             return res
                 .status(201)
                 .json({ message: "Doctor Registered Successfully" });
         }
-        // Send response only once
         return res.status(201).json({ message: "User Created Successfully" });
     } catch (error) {
         console.log(error);
@@ -112,6 +120,7 @@ export const register = async (req, res) => {
     }
 };
 
+// function that handles user login, doctor and patient 
 export const login = async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -140,7 +149,7 @@ export const login = async (req, res) => {
 
             if (doctor) {
                 console.log("Doctor found: ", doctor);
-                // Convert doctor document to plain object and merge with user
+                // convert doctor document to plain object and merge with user
                 userObj = { ...userObj, ...doctor.toObject() };
                 console.log("USER HERE IS: ", userObj);
             }
@@ -154,7 +163,7 @@ export const login = async (req, res) => {
                 name: userObj.name,
                 email: userObj.email,
                 role: userObj.role,
-                // Include doctor details if available
+                // include doctor details if available
                 doctorDetails: userObj.doctorName
                     ? {
                           doctorName: userObj.doctorName,
@@ -177,6 +186,7 @@ export const login = async (req, res) => {
     }
 };
 
+// function that handles refresh, manages session by checking refresh token and returning access token based on conditions
 export const refresh = async (req, res) => {
     try {
         const { refreshToken } = req.headers;
@@ -209,6 +219,7 @@ export const refresh = async (req, res) => {
     }
 };
 
+// function that handles user logout 
 export const logout = async (req, res) => {
     try {
         const userId = req.user.userId;

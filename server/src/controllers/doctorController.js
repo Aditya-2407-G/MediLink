@@ -4,18 +4,7 @@ import util from "util";
 
 const execPromise = util.promisify(exec);
 
-export const tempDoctorData = async (req, res) => {
-    try {
-        const doctors = await Doctor.find({}).limit(10);
-        res.status(200).json(doctors);
-    } catch (err) {
-        console.error("Error fetching doctors:", err);
-        res.status(500).json({
-            error: "An error occurred while searching for doctors.",
-        });
-    }
-};
-
+// function that finds doctor based on search results 
 export const findDoctor = async (req, res) => {
     try {
         const {
@@ -70,7 +59,7 @@ export const findDoctor = async (req, res) => {
                         distanceField: "distance",
                         maxDistance: distance
                             ? parseFloat(distance) * 1000
-                            : 50000000, // Convert to meters
+                            : 50000, // Convert to meters
                         query: finalQuery,
                         spherical: true,
                     },
@@ -116,6 +105,7 @@ export const findDoctor = async (req, res) => {
     }
 };
 
+// function that generates embeddings for vector search 
 async function generateEmbeddings(text) {
     try {
         const env = { ...process.env, HF_HUB_DISABLE_SYMLINKS_WARNING: "1" };
@@ -141,7 +131,7 @@ async function generateEmbeddings(text) {
     }
 }
 
-
+// function that handles vector search to give results of doctors based on search queries
 export const aiSeek = async (req, res) => {
     try {
         const text = req.query.text;

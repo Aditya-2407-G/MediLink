@@ -185,3 +185,4 @@ This project is developed as part of the Veersa Technologies Hackathon competiti
 - [@huhrsh](https://www.github.com/huhrsh)
 - [@Aditya-2407-G](https://github.com/Aditya-2407-G)
 - [@namansaini1463](https://github.com/namansaini1463)
+- [@NityaAgarwal](https://github.com/NityaAgarwal)

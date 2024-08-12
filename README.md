@@ -47,11 +47,11 @@ This project is developed as part of the Veersa Technologies Hackathon competiti
 
 **Client:** React-Native, Expo, TailwindCSS
 
-**Server:** Node, Express, Mongoose
+**Server:** Node, Express, Mongoose, JWT 
 
 **Storage:** MongoDB Atlas
 
-**Navigation:** Google Maps API
+**Navigation:** GeoNear, Google Maps
 
 **Vector Search:** Hugging face inference API
 

@@ -28,7 +28,6 @@ This project is developed as part of the Veersa Technologies Hackathon competiti
 
 
 
-
 ## Demo
 
 
@@ -37,7 +36,14 @@ This project is developed as part of the Veersa Technologies Hackathon competiti
 </a>
 
 
+## Data Model
+
+![ER Model](https://github.com/user-attachments/assets/599f192a-3acf-43e6-b89e-f070b634db5a)
+
+
+
 ## Tech Stack
+
 
 **Client:** React-Native, Expo, TailwindCSS
 
@@ -129,7 +135,10 @@ This project is developed as part of the Veersa Technologies Hackathon competiti
     <td>AI seek Page</td>
   </tr>
 </table>
+
+
 ## Future Optimizations
+
 
 **Enhance Booking System:** Improve the booking appointment section by reserving slots being checked out by users to prevent concurrent payments.
 
@@ -143,7 +152,10 @@ This project is developed as part of the Veersa Technologies Hackathon competiti
 
 **AI Search Enhancement:** Improve the AI search feature by expanding the dataset and increasing accuracy for better search results.
 
-**Rescheduling Option:** Allow users to reschedule their appointments easily within the app.## Testing
+**Rescheduling Option:** Allow users to reschedule their appointments easily within the app.
+
+
+## Testing
 
 <table>
   <tr>
@@ -166,6 +178,8 @@ This project is developed as part of the Veersa Technologies Hackathon competiti
     <td>Doctor SignUp</td>
   </tr>
 </table>
+
+
 ## Authors
 
 - [@huhrsh](https://www.github.com/huhrsh)

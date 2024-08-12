@@ -28,7 +28,7 @@ This project is developed as part of the Veersa Technologies Hackathon competiti
 
 
 
-## Demo
+## Demo Video
 
 
 <a href="https://res.cloudinary.com/dddnk0dcn/video/upload/v1723397223/WhatsApp_Video_2024-08-11_at_22.56.29_bcf80560_yxcztd.mp4" target="_blank">

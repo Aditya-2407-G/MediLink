@@ -38,7 +38,8 @@ This project is developed as part of the Veersa Technologies Hackathon competiti
 
 ## Data Model
 
-![ER Model]([https://github.com/user-attachments/assets/599f192a-3acf-43e6-b89e-f070b634db5a](https://res.cloudinary.com/dddnk0dcn/image/upload/v1723390886/WhatsApp_Image_2024-08-11_at_18.05.18_ebe3418e_nadk93.jpg))
+
+![ER Model](https://res.cloudinary.com/dddnk0dcn/image/upload/v1723390886/WhatsApp_Image_2024-08-11_at_18.05.18_ebe3418e_nadk93.jpg)
 
 
 

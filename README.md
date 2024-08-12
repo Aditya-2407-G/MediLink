@@ -38,7 +38,7 @@ This project is developed as part of the Veersa Technologies Hackathon competiti
 
 ## Data Model
 
-![ER Model](https://github.com/user-attachments/assets/599f192a-3acf-43e6-b89e-f070b634db5a)
+![ER Model]([https://github.com/user-attachments/assets/599f192a-3acf-43e6-b89e-f070b634db5a](https://res.cloudinary.com/dddnk0dcn/image/upload/v1723390886/WhatsApp_Image_2024-08-11_at_18.05.18_ebe3418e_nadk93.jpg))
 
 
 
@@ -157,6 +157,7 @@ This project is developed as part of the Veersa Technologies Hackathon competiti
 
 ## Testing
 
+
 <table>
   <tr>
     <td><img src="https://res.cloudinary.com/dddnk0dcn/image/upload/v1723396557/WhatsApp_Image_2024-08-11_at_22.42.28_9572b943_drlzwu.jpg" alt="Testing Image 1" width="200"/></td>
@@ -185,3 +186,4 @@ This project is developed as part of the Veersa Technologies Hackathon competiti
 - [@huhrsh](https://www.github.com/huhrsh)
 - [@Aditya-2407-G](https://github.com/Aditya-2407-G)
 - [@namansaini1463](https://github.com/namansaini1463)
+- [@NityaAgarwal](https://github.com/NityaAgarwal)
